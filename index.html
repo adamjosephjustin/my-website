@@ -8,10 +8,14 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
+            background-color: lightblue;
+            margin: 0;
+            padding: 0;
         }
         .container {
             max-width: 900px;
-            margin: 0 auto;
+            margin: 20px auto;
+            padding: 20px;
         }
         #game-board {
             display: grid;
@@ -30,48 +34,61 @@
             border: 1px solid #000;
             font-size: 24px;
             cursor: pointer;
+            transition: background-color 0.2s;
         }
         .cell.taken {
             pointer-events: none;
-        }
-        #player-name {
-            margin-bottom: 20px;
+            background-color: #e0e0e0;
         }
         #game-message {
             font-size: 20px;
             font-weight: bold;
         }
-        .celebration {
+        #game-message .celebration {
             font-size: 30px;
             color: gold;
             animation: confetti 1s ease-in-out infinite;
         }
-        /* Simple confetti animation */
         @keyframes confetti {
             0% { transform: scale(1); }
             50% { transform: scale(1.2); color: red; }
             100% { transform: scale(1); color: gold; }
         }
-        #player1-name, #player2-name {
-            font-weight: bold;
-        }
-        #player1-name {
-            color: blue;
-        }
-        #player2-name {
-            color: green;
-        }
-        #celebration-message {
-            display: none;
+        #rule-message {
             margin-top: 20px;
-        }
-        #celebration-message.show {
-            display: block;
+            font-size: 16px;
+            font-weight: bold;
+            color: green;
         }
         img {
             width: 5cm;
             height: 5cm;
             margin: 20px auto;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            #game-board {
+                grid-template-columns: repeat(5, 50px);
+                grid-template-rows: repeat(5, 50px);
+                max-width: 400px;
+            }
+            .cell {
+                width: 50px;
+                height: 50px;
+            }
         }
     </style>
 </head>
@@ -79,128 +96,13 @@
     <div class="container">
         <h1>Tic Tac Toe</h1>
         <p id="game-message">Next Move: <span id="next-player">Adam Joseph Justin</span></p>
+        <p id="rule-message">Rule: 5 consecutive rows of 'X' or 'O' to win</p>
 
         <div>
             <label for="player2-input">Enter Player 2 Name:</label>
             <input type="text" id="player2-input" placeholder="Enter Player 2 Name" />
-            <button onclick="updatePlayerNames()">Update Player 2 Name</button>
+            <button class="btn" onclick="updatePlayerNames()">Update Player 2 Name</button>
         </div>
 
         <div>
-            <img src="adam.png" alt="Player Image" />
-        </div>
-
-        <div id="game-board"></div>
-
-        <p id="celebration-message" class="celebration"></p>
-        <button onclick="restartGame()">Restart Game</button>
-    </div>
-
-    <script>
-        const boardSize = 10;
-        let board = [];
-        let currentPlayer = 'X';
-        let playerName1 = 'Adam Joseph Justin';
-        let playerName2 = 'Player 2';
-        let gameOver = false;
-
-        // Initialize the game board
-        function initBoard() {
-            board = [];
-            gameOver = false;
-            document.getElementById('game-message').innerText = `Next Move: ${playerName1}`;
-            document.getElementById('celebration-message').classList.remove('show');
-            const gameBoardElement = document.getElementById('game-board');
-            gameBoardElement.innerHTML = '';
-            for (let i = 0; i < boardSize; i++) {
-                const row = [];
-                for (let j = 0; j < boardSize; j++) {
-                    const cell = document.createElement('div');
-                    cell.classList.add('cell');
-                    cell.dataset.row = i;
-                    cell.dataset.col = j;
-                    cell.addEventListener('click', handleCellClick);
-                    gameBoardElement.appendChild(cell);
-                    row.push(null);
-                }
-                board.push(row);
-            }
-        }
-
-        // Handle cell click
-        function handleCellClick(event) {
-            const row = event.target.dataset.row;
-            const col = event.target.dataset.col;
-            if (board[row][col] !== null || gameOver) return;
-
-            board[row][col] = currentPlayer;
-            event.target.textContent = currentPlayer;
-            event.target.classList.add('taken');
-
-            if (checkWin()) {
-                gameOver = true;
-                document.getElementById('game-message').innerText = `${currentPlayer === 'X' ? playerName1 : playerName2} wins!`;
-                document.getElementById('celebration-message').classList.add('show');
-            } else {
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                document.getElementById('game-message').innerText = `Next Move: ${currentPlayer === 'X' ? playerName1 : playerName2}`;
-            }
-        }
-
-        // Check for 5 in a row win
-        function checkWin() {
-            for (let row = 0; row < boardSize; row++) {
-                for (let col = 0; col < boardSize; col++) {
-                    if (board[row][col] !== null) {
-                        if (
-                            checkDirection(row, col, 1, 0) || // Horizontal
-                            checkDirection(row, col, 0, 1) || // Vertical
-                            checkDirection(row, col, 1, 1) || // Diagonal /
-                            checkDirection(row, col, 1, -1)   // Diagonal \
-                        ) {
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
-        // Check a single direction for 5 in a row
-        function checkDirection(row, col, rowDir, colDir) {
-            let count = 0;
-            for (let i = 0; i < 5; i++) {
-                const r = row + i * rowDir;
-                const c = col + i * colDir;
-                if (
-                    r >= 0 && r < boardSize && c >= 0 && c < boardSize &&
-                    board[r][c] === currentPlayer
-                ) {
-                    count++;
-                } else {
-                    break;
-                }
-            }
-            return count === 5;
-        }
-
-        // Update Player 2's name
-        function updatePlayerNames() {
-            const newName2 = document.getElementById('player2-input').value.trim();
-            if (newName2) {
-                playerName2 = newName2;
-            }
-            document.getElementById('game-message').innerText = `Next Move: ${playerName1}`;
-        }
-
-        // Restart the game
-        function restartGame() {
-            initBoard();
-            currentPlayer = 'X';
-        }
-
-        // Initialize game on page load
-        window.onload = initBoard;
-    </script>
-</body>
-</html>
+       
