@@ -8,10 +8,16 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
+            background-color: lightblue;
+            margin: 0;
+            padding: 0;
         }
         .container {
             max-width: 900px;
-            margin: 0 auto;
+            margin: 20px auto;
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
         }
         #game-board {
             display: grid;
@@ -30,48 +36,84 @@
             border: 1px solid #000;
             font-size: 24px;
             cursor: pointer;
+            transition: background-color 0.2s;
         }
         .cell.taken {
             pointer-events: none;
-        }
-        #player-name {
-            margin-bottom: 20px;
+            background-color: #e0e0e0;
         }
         #game-message {
             font-size: 20px;
             font-weight: bold;
+            margin-bottom: 10px;
         }
-        .celebration {
-            font-size: 30px;
-            color: gold;
-            animation: confetti 1s ease-in-out infinite;
-        }
-        /* Simple confetti animation */
-        @keyframes confetti {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); color: red; }
-            100% { transform: scale(1); color: gold; }
-        }
-        #player1-name, #player2-name {
+        #rule-message {
+            margin-top: 10px;
+            font-size: 16px;
             font-weight: bold;
-        }
-        #player1-name {
-            color: blue;
-        }
-        #player2-name {
             color: green;
         }
         #celebration-message {
+            font-size: 30px;
+            color: gold;
             display: none;
-            margin-top: 20px;
-        }
-        #celebration-message.show {
-            display: block;
         }
         img {
             width: 5cm;
             height: 5cm;
             margin: 20px auto;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            #game-board {
+                grid-template-columns: repeat(5, 50px);
+                grid-template-rows: repeat(5, 50px);
+                max-width: 400px;
+            }
+            .cell {
+                width: 50px;
+                height: 50px;
+            }
+            img {
+                width: 4cm;
+                height: 4cm;
+            }
+        }
+
+        /* Animation for Balloon Popping */
+        .balloon {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: rgba(255, 0, 0, 0.7);
+            border-radius: 50%;
+            animation: pop 1s ease-out forwards;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.5);
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
         }
     </style>
 </head>
@@ -79,11 +121,12 @@
     <div class="container">
         <h1>Tic Tac Toe</h1>
         <p id="game-message">Next Move: <span id="next-player">Adam Joseph Justin</span></p>
+        <p id="rule-message">Rule: 5 consecutive rows of 'X' or 'O' to win</p>
 
         <div>
             <label for="player2-input">Enter Player 2 Name:</label>
             <input type="text" id="player2-input" placeholder="Enter Player 2 Name" />
-            <button onclick="updatePlayerNames()">Update Player 2 Name</button>
+            <button class="btn" onclick="updatePlayerNames()">Update Player 2 Name</button>
         </div>
 
         <div>
@@ -92,8 +135,8 @@
 
         <div id="game-board"></div>
 
-        <p id="celebration-message" class="celebration"></p>
-        <button onclick="restartGame()">Restart Game</button>
+        <p id="celebration-message" class="celebration">🎉🎈 Congrats! You Win! 🎈🎉</p>
+        <button class="btn" onclick="restartGame()">Restart Game</button>
     </div>
 
     <script>
@@ -109,7 +152,7 @@
             board = [];
             gameOver = false;
             document.getElementById('game-message').innerText = `Next Move: ${playerName1}`;
-            document.getElementById('celebration-message').classList.remove('show');
+            document.getElementById('celebration-message').style.display = 'none';
             const gameBoardElement = document.getElementById('game-board');
             gameBoardElement.innerHTML = '';
             for (let i = 0; i < boardSize; i++) {
@@ -140,7 +183,9 @@
             if (checkWin()) {
                 gameOver = true;
                 document.getElementById('game-message').innerText = `${currentPlayer === 'X' ? playerName1 : playerName2} wins!`;
-                document.getElementById('celebration-message').classList.add('show');
+                document.getElementById('celebration-message').style.display = 'block';
+                playClappingSound();
+                showBalloonAnimation();
             } else {
                 currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
                 document.getElementById('game-message').innerText = `Next Move: ${currentPlayer === 'X' ? playerName1 : playerName2}`;
@@ -191,6 +236,28 @@
                 playerName2 = newName2;
             }
             document.getElementById('game-message').innerText = `Next Move: ${playerName1}`;
+        }
+
+        // Play clapping sound
+        function playClappingSound() {
+            const audio = new Audio('https://www.soundjay.com/button/beep-07.wav'); // Example clapping sound URL
+            audio.play();
+        }
+
+        // Show balloons animation
+        function showBalloonAnimation() {
+            for (let i = 0; i < 5; i++) {
+                const balloon = document.createElement('div');
+                balloon.classList.add('balloon');
+                balloon.style.left = `${Math.random() * 100}%`;
+                balloon.style.top = `${Math.random() * 100}%`;
+                document.body.appendChild(balloon);
+
+                // Remove balloon after animation
+                setTimeout(() => {
+                    document.body.removeChild(balloon);
+                }, 2000);
+            }
         }
 
         // Restart the game
