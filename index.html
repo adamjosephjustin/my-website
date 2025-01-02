@@ -37,51 +37,79 @@
         #player-name {
             margin-bottom: 20px;
         }
-        .winner {
-            color: green;
+        #game-message {
             font-size: 20px;
             font-weight: bold;
+        }
+        .celebration {
+            font-size: 30px;
+            color: gold;
+            animation: confetti 1s ease-in-out infinite;
+        }
+        /* Simple confetti animation */
+        @keyframes confetti {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); color: red; }
+            100% { transform: scale(1); color: gold; }
+        }
+        #player1-name, #player2-name {
+            font-weight: bold;
+        }
+        #player1-name {
+            color: blue;
+        }
+        #player2-name {
+            color: green;
+        }
+        #celebration-message {
+            display: none;
+            margin-top: 20px;
+        }
+        #celebration-message.show {
+            display: block;
+        }
+        img {
+            width: 5cm;
+            height: 5cm;
+            margin: 20px auto;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Tic Tac Toe</h1>
-        <p id="player-name">Player 1: <span id="name-display-1">Adam</span> | Player 2: <span id="name-display-2">Eve</span></p>
+        <p id="game-message">Next Move: <span id="next-player">Adam Joseph Justin</span></p>
 
         <div>
-            <label for="player1-input">Player 1 Name:</label>
-            <input type="text" id="player1-input" placeholder="Enter Player 1 Name" />
-        </div>
-        <div>
-            <label for="player2-input">Player 2 Name:</label>
+            <label for="player2-input">Enter Player 2 Name:</label>
             <input type="text" id="player2-input" placeholder="Enter Player 2 Name" />
+            <button onclick="updatePlayerNames()">Update Player 2 Name</button>
         </div>
-        <button onclick="updatePlayerNames()">Update Names</button>
 
         <div>
-            <img src="./adam.png" alt="Picture" />
+            <img src="adam.png" alt="Player Image" />
         </div>
 
         <div id="game-board"></div>
 
-        <p id="game-message"></p>
+        <p id="celebration-message" class="celebration"></p>
         <button onclick="restartGame()">Restart Game</button>
     </div>
 
     <script>
-        const boardSize = 10; // 10x10 Tic-Tac-Toe
+        const boardSize = 10;
         let board = [];
         let currentPlayer = 'X';
-        let playerName1 = 'Adam';
-        let playerName2 = 'Eve';
+        let playerName1 = 'Adam Joseph Justin';
+        let playerName2 = 'Player 2';
         let gameOver = false;
 
-        // Initialize board
+        // Initialize the game board
         function initBoard() {
             board = [];
             gameOver = false;
-            document.getElementById('game-message').innerText = '';
+            document.getElementById('game-message').innerText = `Next Move: ${playerName1}`;
+            document.getElementById('celebration-message').classList.remove('show');
             const gameBoardElement = document.getElementById('game-board');
             gameBoardElement.innerHTML = '';
             for (let i = 0; i < boardSize; i++) {
@@ -111,14 +139,15 @@
 
             if (checkWin()) {
                 gameOver = true;
-                document.getElementById('game-message').textContent = `${currentPlayer === 'X' ? playerName1 : playerName2} (${currentPlayer}) wins!`;
-                document.getElementById('game-message').classList.add('winner');
+                document.getElementById('game-message').innerText = `${currentPlayer === 'X' ? playerName1 : playerName2} wins!`;
+                document.getElementById('celebration-message').classList.add('show');
             } else {
                 currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                document.getElementById('game-message').innerText = `Next Move: ${currentPlayer === 'X' ? playerName1 : playerName2}`;
             }
         }
 
-        // Check for win (5 in a row)
+        // Check for 5 in a row win
         function checkWin() {
             for (let row = 0; row < boardSize; row++) {
                 for (let col = 0; col < boardSize; col++) {
@@ -137,7 +166,7 @@
             return false;
         }
 
-        // Check one direction for 5 in a row
+        // Check a single direction for 5 in a row
         function checkDirection(row, col, rowDir, colDir) {
             let count = 0;
             for (let i = 0; i < 5; i++) {
@@ -155,25 +184,19 @@
             return count === 5;
         }
 
-        // Update player names
+        // Update Player 2's name
         function updatePlayerNames() {
-            const newName1 = document.getElementById('player1-input').value.trim();
             const newName2 = document.getElementById('player2-input').value.trim();
-            if (newName1) {
-                playerName1 = newName1;
-                document.getElementById('name-display-1').textContent = playerName1;
-            }
             if (newName2) {
                 playerName2 = newName2;
-                document.getElementById('name-display-2').textContent = playerName2;
             }
+            document.getElementById('game-message').innerText = `Next Move: ${playerName1}`;
         }
 
         // Restart the game
         function restartGame() {
             initBoard();
             currentPlayer = 'X';
-            document.getElementById('game-message').innerText = '';
         }
 
         // Initialize game on page load
