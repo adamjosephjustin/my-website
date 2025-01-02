@@ -47,9 +47,17 @@
 <body>
     <div class="container">
         <h1>Tic Tac Toe</h1>
-        <p id="player-name">Player Name: <span id="name-display">Adam</span></p>
-        <input type="text" id="name-input" placeholder="Enter Player Name" />
-        <button onclick="updatePlayerName()">Update Name</button>
+        <p id="player-name">Player 1: <span id="name-display-1">Adam</span> | Player 2: <span id="name-display-2">Eve</span></p>
+
+        <div>
+            <label for="player1-input">Player 1 Name:</label>
+            <input type="text" id="player1-input" placeholder="Enter Player 1 Name" />
+        </div>
+        <div>
+            <label for="player2-input">Player 2 Name:</label>
+            <input type="text" id="player2-input" placeholder="Enter Player 2 Name" />
+        </div>
+        <button onclick="updatePlayerNames()">Update Names</button>
 
         <div>
             <img src="https://via.placeholder.com/300x200.png" alt="Picture" />
@@ -58,13 +66,15 @@
         <div id="game-board"></div>
 
         <p id="game-message"></p>
+        <button onclick="restartGame()">Restart Game</button>
     </div>
 
     <script>
         const boardSize = 10; // 10x10 Tic-Tac-Toe
         let board = [];
         let currentPlayer = 'X';
-        let playerName = 'Adam';
+        let playerName1 = 'Adam';
+        let playerName2 = 'Eve';
         let gameOver = false;
 
         // Initialize board
@@ -101,7 +111,7 @@
 
             if (checkWin()) {
                 gameOver = true;
-                document.getElementById('game-message').textContent = `${playerName} (${currentPlayer}) wins!`;
+                document.getElementById('game-message').textContent = `${currentPlayer === 'X' ? playerName1 : playerName2} (${currentPlayer}) wins!`;
                 document.getElementById('game-message').classList.add('winner');
             } else {
                 currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
@@ -110,7 +120,6 @@
 
         // Check for win (5 in a row)
         function checkWin() {
-            // Check rows, columns, and diagonals for a win
             for (let row = 0; row < boardSize; row++) {
                 for (let col = 0; col < boardSize; col++) {
                     if (board[row][col] !== null) {
@@ -146,15 +155,25 @@
             return count === 5;
         }
 
-        // Update player name
-        function updatePlayerName() {
-            const newName = document.getElementById('name-input').value.trim();
-            if (newName) {
-                playerName = newName;
-                document.getElementById('name-display').textContent = playerName;
-            } else {
-                alert('Please enter a valid name.');
+        // Update player names
+        function updatePlayerNames() {
+            const newName1 = document.getElementById('player1-input').value.trim();
+            const newName2 = document.getElementById('player2-input').value.trim();
+            if (newName1) {
+                playerName1 = newName1;
+                document.getElementById('name-display-1').textContent = playerName1;
             }
+            if (newName2) {
+                playerName2 = newName2;
+                document.getElementById('name-display-2').textContent = playerName2;
+            }
+        }
+
+        // Restart the game
+        function restartGame() {
+            initBoard();
+            currentPlayer = 'X';
+            document.getElementById('game-message').innerText = '';
         }
 
         // Initialize game on page load
