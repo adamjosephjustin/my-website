@@ -11,12 +11,6 @@
             background-color: lightblue;
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
         }
         .container {
             max-width: 900px;
@@ -64,4 +58,199 @@
             color: gold;
             display: none;
         }
-      
+        img {
+            width: 5cm;
+            height: 5cm;
+            margin: 20px auto;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            #game-board {
+                grid-template-columns: repeat(5, 50px);
+                grid-template-rows: repeat(5, 50px);
+                max-width: 400px;
+            }
+            .cell {
+                width: 50px;
+                height: 50px;
+            }
+            img {
+                width: 4cm;
+                height: 4cm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tic Tac Toe</h1>
+        <p id="game-message">Next Move: <span id="next-player">Adam Joseph Justin</span></p>
+        <p id="rule-message">Rule: 5 consecutive rows of 'X' or 'O' to win</p>
+
+        <div>
+            <label for="player2-input">Enter Player 2 Name:</label>
+            <input type="text" id="player2-input" placeholder="Enter Player 2 Name" />
+            <button class="btn" onclick="updatePlayerNames()">Update Player 2 Name</button>
+        </div>
+
+        <div>
+            <img src="adam.png" alt="Player Image" />
+        </div>
+
+        <div id="game-board"></div>
+
+        <p id="celebration-message" class="celebration">🎉🎈 Congrats! You Win! 🎈🎉</p>
+        <button class="btn" onclick="restartGame()">Restart Game</button>
+    </div>
+
+    <script>
+        const boardSize = 10;
+        let board = [];
+        let currentPlayer = 'X';
+        let playerName1 = 'Adam Joseph Justin';
+        let playerName2 = 'Player 2';
+        let gameOver = false;
+
+        // Initialize the game board
+        function initBoard() {
+            board = [];
+            gameOver = false;
+            document.getElementById('game-message').innerText = `Next Move: ${playerName1}`;
+            document.getElementById('celebration-message').classList.remove('show');
+            document.getElementById('celebration-message').innerHTML = '';
+            const gameBoardElement = document.getElementById('game-board');
+            gameBoardElement.innerHTML = '';
+            for (let i = 0; i < boardSize; i++) {
+                const row = [];
+                for (let j = 0; j < boardSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.addEventListener('click', handleCellClick);
+                    gameBoardElement.appendChild(cell);
+                    row.push(null);
+                }
+                board.push(row);
+            }
+        }
+
+        // Handle cell click
+        function handleCellClick(event) {
+            const row = event.target.dataset.row;
+            const col = event.target.dataset.col;
+            if (board[row][col] !== null || gameOver) return;
+
+            board[row][col] = currentPlayer;
+            event.target.textContent = currentPlayer;
+            event.target.classList.add('taken');
+
+            if (checkWin()) {
+                gameOver = true;
+                document.getElementById('game-message').innerText = `${currentPlayer === 'X' ? playerName1 : playerName2} wins!`;
+                document.getElementById('celebration-message').innerHTML = '🎉🎈 Congrats! You Win! 🎈🎉';
+                document.getElementById('celebration-message').style.display = 'block';
+                playClappingSound();
+                showBalloonAnimation();
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                document.getElementById('game-message').innerText = `Next Move: ${currentPlayer === 'X' ? playerName1 : playerName2}`;
+            }
+        }
+
+        // Check for 5 in a row win
+        function checkWin() {
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    if (board[row][col] !== null) {
+                        if (
+                            checkDirection(row, col, 1, 0) || // Horizontal
+                            checkDirection(row, col, 0, 1) || // Vertical
+                            checkDirection(row, col, 1, 1) || // Diagonal /
+                            checkDirection(row, col, 1, -1)   // Diagonal \
+                        ) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        // Check a single direction for 5 in a row
+        function checkDirection(row, col, rowDir, colDir) {
+            let count = 0;
+            for (let i = 0; i < 5; i++) {
+                const r = row + i * rowDir;
+                const c = col + i * colDir;
+                if (
+                    r >= 0 && r < boardSize && c >= 0 && c < boardSize &&
+                    board[r][c] === currentPlayer
+                ) {
+                    count++;
+                } else {
+                    break;
+                }
+            }
+            return count === 5;
+        }
+
+        // Update Player 2's name
+        function updatePlayerNames() {
+            const newName2 = document.getElementById('player2-input').value.trim();
+            if (newName2) {
+                playerName2 = newName2;
+            }
+            document.getElementById('game-message').innerText = `Next Move: ${playerName1}`;
+        }
+
+        // Play clapping sound
+        function playClappingSound() {
+            const audio = new Audio('https://www.soundjay.com/button/beep-07.wav'); // Example clapping sound URL
+            audio.play();
+        }
+
+        // Show balloons animation
+        function showBalloonAnimation() {
+            const balloonImage = document.createElement('img');
+            balloonImage.src = 'https://www.clipartmax.com/png/full/150-1500143_balloon-clipart.png'; // Example balloon image
+            balloonImage.style.position = 'absolute';
+            balloonImage.style.top = '50%';
+            balloonImage.style.left = '50%';
+            balloonImage.style.transform = 'translate(-50%, -50%) scale(0)';
+            document.body.appendChild(balloonImage);
+
+            setTimeout(() => {
+                balloonImage.style.transition = 'transform 2s ease-in-out';
+                balloonImage.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 100);
+
+            setTimeout(() => {
+                document.body.removeChild(balloonImage);
+            }, 3000);
+        }
+
+        // Restart the game
+        function restartGame() {
+            initBoard();
+            currentPlayer = 'X';
+        }
+
+        // Initialize game on page load
+        window.onload = initBoard;
+    </script>
+</body>
+</html>
