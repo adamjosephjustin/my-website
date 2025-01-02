@@ -1,122 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tic Tac Toe</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 20px;
-    }
-    h1 {
-      color: #333;
-    }
-    .board {
-      display: grid;
-      grid-template-columns: repeat(3, 100px);
-      gap: 5px;
-      justify-content: center;
-      margin: 20px auto;
-    }
-    .cell {
-      width: 100px;
-      height: 100px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      font-weight: bold;
-      cursor: pointer;
-      border: 2px solid #333;
-      background-color: #f9f9f9;
-    }
-    .cell.taken {
-      cursor: not-allowed;
-      background-color: #ddd;
-    }
-    .winner {
-      margin-top: 20px;
-      font-size: 1.5rem;
-      color: green;
-    }
-    .reset {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(10, 60px);
+            grid-template-rows: repeat(10, 60px);
+            gap: 5px;
+            margin: 20px auto;
+            max-width: 650px;
+        }
+        .cell {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #000;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .cell.taken {
+            pointer-events: none;
+        }
+        #player-name {
+            margin-bottom: 20px;
+        }
+        .winner {
+            color: green;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-  <h1>Tic Tac Toe</h1>
-  <div class="board" id="board"></div>
-  <div class="winner" id="winner"></div>
-  <button class="reset" id="reset">Restart Game</button>
+    <div class="container">
+        <h1>Tic Tac Toe</h1>
+        <p id="player-name">Player Name: <span id="name-display">Adam</span></p>
+        <input type="text" id="name-input" placeholder="Enter Player Name" />
+        <button onclick="updatePlayerName()">Update Name</button>
 
-  <script>
-    const board = document.getElementById('board');
-    const winnerDisplay = document.getElementById('winner');
-    const resetButton = document.getElementById('reset');
+        <div>
+            <img src="https://via.placeholder.com/300x200.png" alt="Picture" />
+        </div>
 
-    let currentPlayer = 'X';
-    let gameActive = true;
-    let boardState = Array(9).fill(null);
+        <div id="game-board"></div>
 
-    const winningConditions = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-      [0, 4, 8], [2, 4, 6]             // Diagonals
-    ];
+        <p id="game-message"></p>
+    </div>
 
-    function createBoard() {
-      board.innerHTML = '';
-      boardState.forEach((cell, index) => {
-        const cellElement = document.createElement('div');
-        cellElement.classList.add('cell');
-        cellElement.dataset.index = index;
-        cellElement.textContent = cell;
-        cellElement.addEventListener('click', handleCellClick);
-        board.appendChild(cellElement);
-      });
-    }
+    <script>
+        const boardSize = 10; // 10x10 Tic-Tac-Toe
+        let board = [];
+        let currentPlayer = 'X';
+        let playerName = 'Adam';
+        let gameOver = false;
 
-    function handleCellClick(e) {
-      const index = e.target.dataset.index;
+        // Initialize board
+        function initBoard() {
+            board = [];
+            gameOver = false;
+            document.getElementById('game-message').innerText = '';
+            const gameBoardElement = document.getElementById('game-board');
+            gameBoardElement.innerHTML = '';
+            for (let i = 0; i < boardSize; i++) {
+                const row = [];
+                for (let j = 0; j < boardSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.addEventListener('click', handleCellClick);
+                    gameBoardElement.appendChild(cell);
+                    row.push(null);
+                }
+                board.push(row);
+            }
+        }
 
-      if (boardState[index] || !gameActive) return;
+        // Handle cell click
+        function handleCellClick(event) {
+            const row = event.target.dataset.row;
+            const col = event.target.dataset.col;
+            if (board[row][col] !== null || gameOver) return;
 
-      boardState[index] = currentPlayer;
-      e.target.textContent = currentPlayer;
-      e.target.classList.add('taken');
+            board[row][col] = currentPlayer;
+            event.target.textContent = currentPlayer;
+            event.target.classList.add('taken');
 
-      if (checkWinner()) {
-        winnerDisplay.textContent = `${currentPlayer} Wins!`;
-        gameActive = false;
-      } else if (!boardState.includes(null)) {
-        winnerDisplay.textContent = 'It\'s a Draw!';
-        gameActive = false;
-      } else {
-        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-      }
-    }
+            if (checkWin()) {
+                gameOver = true;
+                document.getElementById('game-message').textContent = `${playerName} (${currentPlayer}) wins!`;
+                document.getElementById('game-message').classList.add('winner');
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            }
+        }
 
-    function checkWinner() {
-      return winningConditions.some(condition => 
-        condition.every(index => boardState[index] === currentPlayer)
-      );
-    }
+        // Check for win (5 in a row)
+        function checkWin() {
+            // Check rows, columns, and diagonals for a win
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    if (board[row][col] !== null) {
+                        if (
+                            checkDirection(row, col, 1, 0) || // Horizontal
+                            checkDirection(row, col, 0, 1) || // Vertical
+                            checkDirection(row, col, 1, 1) || // Diagonal /
+                            checkDirection(row, col, 1, -1)   // Diagonal \
+                        ) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
 
-    resetButton.addEventListener('click', () => {
-      boardState.fill(null);
-      currentPlayer = 'X';
-      gameActive = true;
-      winnerDisplay.textContent = '';
-      createBoard();
-    });
+        // Check one direction for 5 in a row
+        function checkDirection(row, col, rowDir, colDir) {
+            let count = 0;
+            for (let i = 0; i < 5; i++) {
+                const r = row + i * rowDir;
+                const c = col + i * colDir;
+                if (
+                    r >= 0 && r < boardSize && c >= 0 && c < boardSize &&
+                    board[r][c] === currentPlayer
+                ) {
+                    count++;
+                } else {
+                    break;
+                }
+            }
+            return count === 5;
+        }
 
-    createBoard();
-  </script>
+        // Update player name
+        function updatePlayerName() {
+            const newName = document.getElementById('name-input').value.trim();
+            if (newName) {
+                playerName = newName;
+                document.getElementById('name-display').textContent = playerName;
+            } else {
+                alert('Please enter a valid name.');
+            }
+        }
+
+        // Initialize game on page load
+        window.onload = initBoard;
+    </script>
 </body>
 </html>
