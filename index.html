@@ -3,271 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic Tac Toe Game</title>
+    <title>Flappy Bird Game</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: lightblue;
+        body, html {
             margin: 0;
             padding: 0;
-        }
-        .container {
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 20px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        #game-board {
-            display: grid;
-            grid-template-columns: repeat(10, 60px);
-            grid-template-rows: repeat(10, 60px);
-            gap: 5px;
-            margin: 20px auto;
-            max-width: 650px;
-        }
-        .cell {
-            width: 60px;
-            height: 60px;
+            overflow: hidden;
+            height: 100%;
+            background-color: #70c5ce;
             display: flex;
-            align-items: center;
             justify-content: center;
-            border: 1px solid #000;
-            font-size: 24px;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
         }
-        .cell.taken {
-            pointer-events: none;
-            background-color: #e0e0e0;
+        canvas {
+            background-color: #ffffff;
+            display: block;
         }
-        #game-message {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        #rule-message {
-            margin-top: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            color: green;
-        }
-        #celebration-message {
-            font-size: 30px;
-            color: gold;
-            display: none;
-        }
-        img {
-            width: 5cm;
-            height: 5cm;
-            margin: 20px auto;
-        }
-        .btn {
-            padding: 10px 20px;
-            margin: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .btn:hover {
-            background-color: #45a049;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            #game-board {
-                grid-template-columns: repeat(5, 50px);
-                grid-template-rows: repeat(5, 50px);
-                max-width: 400px;
-            }
-            .cell {
-                width: 50px;
-                height: 50px;
-            }
-            img {
-                width: 4cm;
-                height: 4cm;
-            }
-        }
-
-        /* Animation for Balloon Popping */
-        .balloon {
+        #score-board {
             position: absolute;
-            width: 100px;
-            height: 100px;
-            background-color: rgba(255, 0, 0, 0.7);
-            border-radius: 50%;
-            animation: pop 1s ease-out forwards;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            color: #ffffff;
+            z-index: 100;
         }
-
-        @keyframes pop {
-            0% {
-                transform: scale(0);
-            }
-            50% {
-                transform: scale(1.5);
-            }
-            100% {
-                transform: scale(0);
-                opacity: 0;
-            }
+        .score {
+            margin-right: 15px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Tic Tac Toe</h1>
-        <p id="game-message">Next Move: <span id="next-player">Adam Joseph Justin</span></p>
-        <p id="rule-message">Rule: 5 consecutive rows of 'X' or 'O' to win</p>
 
-        <div>
-            <label for="player2-input">Enter Player 2 Name:</label>
-            <input type="text" id="player2-input" placeholder="Enter Player 2 Name" />
-            <button class="btn" onclick="updatePlayerNames()">Update Player 2 Name</button>
-        </div>
+<div id="score-board">
+    <span class="score">Score: <span id="current-score">0</span></span>
+    <span class="score">High Score: <span id="high-score">0</span></span>
+</div>
 
-        <div>
-            <img src="adam.png" alt="Player Image" />
-        </div>
+<canvas id="gameCanvas"></canvas>
 
-        <div id="game-board"></div>
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
 
-        <p id="celebration-message" class="celebration">🎉🎈 Congrats! You Win! 🎈🎉</p>
-        <button class="btn" onclick="restartGame()">Restart Game</button>
-    </div>
+    // Set canvas size to fill the screen while maintaining aspect ratio
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-    <script>
-        const boardSize = 10;
-        let board = [];
-        let currentPlayer = 'X';
-        let playerName1 = 'Adam Joseph Justin';
-        let playerName2 = 'Player 2';
-        let gameOver = false;
+    // Game variables
+    const GRAVITY = 0.5;
+    const FLAP_STRENGTH = -10;
+    let birdY = canvas.height / 2;
+    let birdVelocity = 0;
+    let birdWidth = 30;
+    let birdHeight = 30;
+    let birdX = 50;
+    let birdFlap = false;
 
-        // Initialize the game board
-        function initBoard() {
-            board = [];
-            gameOver = false;
-            document.getElementById('game-message').innerText = `Next Move: ${playerName1}`;
-            document.getElementById('celebration-message').style.display = 'none';
-            const gameBoardElement = document.getElementById('game-board');
-            gameBoardElement.innerHTML = '';
-            for (let i = 0; i < boardSize; i++) {
-                const row = [];
-                for (let j = 0; j < boardSize; j++) {
-                    const cell = document.createElement('div');
-                    cell.classList.add('cell');
-                    cell.dataset.row = i;
-                    cell.dataset.col = j;
-                    cell.addEventListener('click', handleCellClick);
-                    gameBoardElement.appendChild(cell);
-                    row.push(null);
-                }
-                board.push(row);
-            }
+    let pipes = [];
+    const pipeWidth = 60;
+    const pipeGap = 200;
+    let pipeSpeed = 2;
+    let frameCount = 0;
+
+    let currentScore = 0;
+    let highScore = localStorage.getItem("flappyHighScore") || 0;
+
+    // Draw the bird
+    function drawBird() {
+        ctx.fillStyle = "yellow";
+        ctx.fillRect(birdX, birdY, birdWidth, birdHeight);
+    }
+
+    // Draw pipes
+    function drawPipes() {
+        pipes.forEach((pipe, index) => {
+            ctx.fillStyle = "green";
+            ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
+            ctx.fillRect(pipe.x, pipe.top + pipeGap, pipeWidth, canvas.height - pipe.top - pipeGap);
+        });
+    }
+
+    // Update the game state
+    function updateGame() {
+        frameCount++;
+        
+        // Move bird
+        if (birdFlap) {
+            birdVelocity = FLAP_STRENGTH;
+            birdFlap = false;
+        }
+        birdVelocity += GRAVITY;
+        birdY += birdVelocity;
+
+        // Prevent bird from flying out of bounds
+        if (birdY <= 0) {
+            birdY = 0;
+            birdVelocity = 0;
+        } else if (birdY + birdHeight >= canvas.height) {
+            birdY = canvas.height - birdHeight;
+            birdVelocity = 0;
+            endGame();
         }
 
-        // Handle cell click
-        function handleCellClick(event) {
-            const row = event.target.dataset.row;
-            const col = event.target.dataset.col;
-            if (board[row][col] !== null || gameOver) return;
-
-            board[row][col] = currentPlayer;
-            event.target.textContent = currentPlayer;
-            event.target.classList.add('taken');
-
-            if (checkWin()) {
-                gameOver = true;
-                document.getElementById('game-message').innerText = `${currentPlayer === 'X' ? playerName1 : playerName2} wins!`;
-                document.getElementById('celebration-message').style.display = 'block';
-                playClappingSound();
-                showBalloonAnimation();
-            } else {
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                document.getElementById('game-message').innerText = `Next Move: ${currentPlayer === 'X' ? playerName1 : playerName2}`;
-            }
+        // Handle pipes
+        if (frameCount % 60 === 0) {
+            const pipeTop = Math.floor(Math.random() * (canvas.height - pipeGap));
+            pipes.push({ x: canvas.width, top: pipeTop });
         }
 
-        // Check for 5 in a row win
-        function checkWin() {
-            for (let row = 0; row < boardSize; row++) {
-                for (let col = 0; col < boardSize; col++) {
-                    if (board[row][col] !== null) {
-                        if (
-                            checkDirection(row, col, 1, 0) || // Horizontal
-                            checkDirection(row, col, 0, 1) || // Vertical
-                            checkDirection(row, col, 1, 1) || // Diagonal /
-                            checkDirection(row, col, 1, -1)   // Diagonal \
-                        ) {
-                            return true;
-                        }
-                    }
-                }
+        pipes.forEach((pipe, index) => {
+            pipe.x -= pipeSpeed;
+            if (pipe.x + pipeWidth <= 0) {
+                pipes.splice(index, 1);
+                currentScore++;
             }
-            return false;
-        }
+        });
 
-        // Check a single direction for 5 in a row
-        function checkDirection(row, col, rowDir, colDir) {
-            let count = 0;
-            for (let i = 0; i < 5; i++) {
-                const r = row + i * rowDir;
-                const c = col + i * colDir;
-                if (
-                    r >= 0 && r < boardSize && c >= 0 && c < boardSize &&
-                    board[r][c] === currentPlayer
-                ) {
-                    count++;
-                } else {
-                    break;
+        // Check for collisions
+        pipes.forEach(pipe => {
+            if (birdX + birdWidth > pipe.x && birdX < pipe.x + pipeWidth) {
+                if (birdY < pipe.top || birdY + birdHeight > pipe.top + pipeGap) {
+                    endGame();
                 }
             }
-            return count === 5;
+        });
+
+        // Update scores
+        if (currentScore > highScore) {
+            highScore = currentScore;
+            localStorage.setItem("flappyHighScore", highScore);
         }
 
-        // Update Player 2's name
-        function updatePlayerNames() {
-            const newName2 = document.getElementById('player2-input').value.trim();
-            if (newName2) {
-                playerName2 = newName2;
-            }
-            document.getElementById('game-message').innerText = `Next Move: ${playerName1}`;
+        // Draw everything
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBird();
+        drawPipes();
+        drawScores();
+    }
+
+    // Draw the score board
+    function drawScores() {
+        document.getElementById('current-score').textContent = currentScore;
+        document.getElementById('high-score').textContent = highScore;
+    }
+
+    // End the game and reset score
+    function endGame() {
+        alert("Game Over!");
+        currentScore = 0;
+        pipes = [];
+        birdY = canvas.height / 2;
+        birdVelocity = 0;
+    }
+
+    // Start the game loop
+    function gameLoop() {
+        updateGame();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Handle user input
+    window.addEventListener("keydown", (e) => {
+        if (e.key === " " || e.key === "ArrowUp") {
+            birdFlap = true;
         }
+    });
 
-        // Play clapping sound
-        function playClappingSound() {
-            const audio = new Audio('https://www.soundjay.com/button/beep-07.wav'); // Example clapping sound URL
-            audio.play();
-        }
+    window.addEventListener("touchstart", (e) => {
+        birdFlap = true;
+    });
 
-        // Show balloons animation
-        function showBalloonAnimation() {
-            for (let i = 0; i < 5; i++) {
-                const balloon = document.createElement('div');
-                balloon.classList.add('balloon');
-                balloon.style.left = `${Math.random() * 100}%`;
-                balloon.style.top = `${Math.random() * 100}%`;
-                document.body.appendChild(balloon);
+    // Resize canvas on window resize
+    window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
 
-                // Remove balloon after animation
-                setTimeout(() => {
-                    document.body.removeChild(balloon);
-                }, 2000);
-            }
-        }
+    // Start the game
+    gameLoop();
+</script>
 
-        // Restart the game
-        function restartGame() {
-            initBoard();
-            currentPlayer = 'X';
-        }
-
-        // Initialize game on page load
-        window.onload = initBoard;
-    </script>
 </body>
 </html>
