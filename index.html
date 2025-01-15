@@ -63,12 +63,16 @@
 
     let pipes = [];
     const pipeWidth = 60;
-    const pipeGap = 200;
+    const pipeGap = 250; // Increase the gap to make it easier
     let pipeSpeed = 2;
     let frameCount = 0;
 
     let currentScore = 0;
     let highScore = localStorage.getItem("flappyHighScore") || 0;
+
+    // Initial state for the game (bird flies up for the first 2 seconds)
+    let gameStarted = false;
+    let autoFlyTime = 0;
 
     // Draw the bird
     function drawBird() {
@@ -89,10 +93,21 @@
     function updateGame() {
         frameCount++;
         
+        // Auto fly for the first 2 seconds
+        if (!gameStarted) {
+            autoFlyTime++;
+            birdVelocity = FLAP_STRENGTH; // Bird flies upwards
+            if (autoFlyTime > 120) { // 120 frames = 2 seconds
+                gameStarted = true;
+            }
+        }
+
         // Move bird
-        if (birdFlap) {
-            birdVelocity = FLAP_STRENGTH;
-            birdFlap = false;
+        if (gameStarted) {
+            if (birdFlap) {
+                birdVelocity = FLAP_STRENGTH;
+                birdFlap = false;
+            }
         }
         birdVelocity += GRAVITY;
         birdY += birdVelocity;
@@ -156,6 +171,8 @@
         pipes = [];
         birdY = canvas.height / 2;
         birdVelocity = 0;
+        gameStarted = false;
+        autoFlyTime = 0;
     }
 
     // Start the game loop
