@@ -1,206 +1,431 @@
+Got it! Here's an updated version where all 5 games are embedded directly within the same HTML file, making it mobile-friendly and suitable for kids. The games will be shown within the same page, with each game being displayed when selected.
+
+### Full HTML Page with 5 Games for Kids:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Bird Game</title>
+    <title>Fun Games for Kids</title>
     <style>
         body, html {
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            height: 100%;
-            background-color: #70c5ce;
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Arial', sans-serif;
+            height: 100vh;
         }
+
+        #container {
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #333;
+        }
+
+        .game-button {
+            margin: 20px;
+            padding: 15px 30px;
+            background-color: #70c5ce;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .game-button:hover {
+            background-color: #4fa3ad;
+        }
+
+        .game-container {
+            margin-top: 20px;
+        }
+
         canvas {
-            background-color: #ffffff;
             display: block;
-        }
-        #score-board {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 24px;
-            color: #ffffff;
-            z-index: 100;
-        }
-        .score {
-            margin-right: 15px;
+            margin: 0 auto;
         }
     </style>
 </head>
 <body>
 
-<div id="score-board">
-    <span class="score">Score: <span id="current-score">0</span></span>
-    <span class="score">High Score: <span id="high-score">0</span></span>
+<div id="container">
+    <h1>Welcome to Fun Games for Kids!</h1>
+    <p>Select a game to play:</p>
+
+    <button class="game-button" onclick="startGame('flappyBird')">Flappy Bird</button>
+    <button class="game-button" onclick="startGame('memoryGame')">Memory Game</button>
+    <button class="game-button" onclick="startGame('pong')">Pong</button>
+    <button class="game-button" onclick="startGame('tictactoe')">Tic Tac Toe</button>
+    <button class="game-button" onclick="startGame('snakeGame')">Snake Game</button>
+
+    <div id="gameContainer" class="game-container"></div>
 </div>
 
-<canvas id="gameCanvas"></canvas>
-
 <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-
-    // Set canvas size to fill the screen while maintaining aspect ratio
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    // Game variables
-    const GRAVITY = 0.5;
-    const FLAP_STRENGTH = -10;
-    let birdY = canvas.height / 2;
-    let birdVelocity = 0;
-    let birdWidth = 30;
-    let birdHeight = 30;
-    let birdX = 50;
-    let birdFlap = false;
-
-    let pipes = [];
-    const pipeWidth = 60;
-    const pipeGap = 250; // Increase the gap to make it easier
-    let pipeSpeed = 2;
-    let frameCount = 0;
-
-    let currentScore = 0;
-    let highScore = localStorage.getItem("flappyHighScore") || 0;
-
-    // Initial state for the game (bird flies up for the first 2 seconds)
-    let gameStarted = false;
-    let autoFlyTime = 0;
-
-    // Draw the bird
-    function drawBird() {
-        ctx.fillStyle = "yellow";
-        ctx.fillRect(birdX, birdY, birdWidth, birdHeight);
-    }
-
-    // Draw pipes
-    function drawPipes() {
-        pipes.forEach((pipe, index) => {
-            ctx.fillStyle = "green";
-            ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
-            ctx.fillRect(pipe.x, pipe.top + pipeGap, pipeWidth, canvas.height - pipe.top - pipeGap);
-        });
-    }
-
-    // Update the game state
-    function updateGame() {
-        frameCount++;
+    function startGame(game) {
+        const gameContainer = document.getElementById('gameContainer');
+        gameContainer.innerHTML = ''; // Clear the game container
         
-        // Auto fly for the first 2 seconds
-        if (!gameStarted) {
-            autoFlyTime++;
-            birdVelocity = FLAP_STRENGTH; // Bird flies upwards
-            if (autoFlyTime > 120) { // 120 frames = 2 seconds
-                gameStarted = true;
+        if (game === 'flappyBird') {
+            gameContainer.innerHTML = flappyBirdGame();
+        } else if (game === 'memoryGame') {
+            gameContainer.innerHTML = memoryGame();
+        } else if (game === 'pong') {
+            gameContainer.innerHTML = pongGame();
+        } else if (game === 'tictactoe') {
+            gameContainer.innerHTML = ticTacToeGame();
+        } else if (game === 'snakeGame') {
+            gameContainer.innerHTML = snakeGame();
+        }
+    }
+
+    // Flappy Bird Game
+    function flappyBirdGame() {
+        return `
+        <canvas id="gameCanvasFlappy" width="100%" height="500px"></canvas>
+        <script>
+            const canvasFlappy = document.getElementById('gameCanvasFlappy');
+            const ctxFlappy = canvasFlappy.getContext('2d');
+            canvasFlappy.width = window.innerWidth;
+            canvasFlappy.height = 500;
+
+            const GRAVITY = 0.5;
+            const FLAP_STRENGTH = -10;
+            let birdY = canvasFlappy.height / 2;
+            let birdVelocity = 0;
+            let birdWidth = 30;
+            let birdHeight = 30;
+            let birdX = 50;
+            let birdFlap = false;
+            let pipes = [];
+            const pipeWidth = 60;
+            const pipeGap = 250;
+            let pipeSpeed = 2;
+            let frameCount = 0;
+            let currentScore = 0;
+            let gameStarted = false;
+            let autoFlyTime = 0;
+
+            function drawBird() {
+                ctxFlappy.fillStyle = "yellow";
+                ctxFlappy.fillRect(birdX, birdY, birdWidth, birdHeight);
             }
-        }
 
-        // Move bird
-        if (gameStarted) {
-            if (birdFlap) {
-                birdVelocity = FLAP_STRENGTH;
-                birdFlap = false;
+            function drawPipes() {
+                pipes.forEach(pipe => {
+                    ctxFlappy.fillStyle = "green";
+                    ctxFlappy.fillRect(pipe.x, 0, pipeWidth, pipe.top);
+                    ctxFlappy.fillRect(pipe.x, pipe.top + pipeGap, pipeWidth, canvasFlappy.height - pipe.top - pipeGap);
+                });
             }
-        }
-        birdVelocity += GRAVITY;
-        birdY += birdVelocity;
 
-        // Prevent bird from flying out of bounds
-        if (birdY <= 0) {
-            birdY = 0;
-            birdVelocity = 0;
-        } else if (birdY + birdHeight >= canvas.height) {
-            birdY = canvas.height - birdHeight;
-            birdVelocity = 0;
-            endGame();
-        }
+            function updateGame() {
+                frameCount++;
+                if (!gameStarted) {
+                    autoFlyTime++;
+                    birdVelocity = FLAP_STRENGTH;
+                    if (autoFlyTime > 120) { gameStarted = true; }
+                }
+                if (gameStarted) {
+                    if (birdFlap) {
+                        birdVelocity = FLAP_STRENGTH;
+                        birdFlap = false;
+                    }
+                }
 
-        // Handle pipes
-        if (frameCount % 60 === 0) {
-            const pipeTop = Math.floor(Math.random() * (canvas.height - pipeGap));
-            pipes.push({ x: canvas.width, top: pipeTop });
-        }
-
-        pipes.forEach((pipe, index) => {
-            pipe.x -= pipeSpeed;
-            if (pipe.x + pipeWidth <= 0) {
-                pipes.splice(index, 1);
-                currentScore++;
-            }
-        });
-
-        // Check for collisions
-        pipes.forEach(pipe => {
-            if (birdX + birdWidth > pipe.x && birdX < pipe.x + pipeWidth) {
-                if (birdY < pipe.top || birdY + birdHeight > pipe.top + pipeGap) {
+                birdVelocity += GRAVITY;
+                birdY += birdVelocity;
+                if (birdY <= 0) birdY = 0;
+                if (birdY + birdHeight >= canvasFlappy.height) {
+                    birdY = canvasFlappy.height - birdHeight;
+                    birdVelocity = 0;
                     endGame();
                 }
+
+                if (frameCount % 60 === 0) {
+                    const pipeTop = Math.floor(Math.random() * (canvasFlappy.height - pipeGap));
+                    pipes.push({ x: canvasFlappy.width, top: pipeTop });
+                }
+
+                pipes.forEach((pipe, index) => {
+                    pipe.x -= pipeSpeed;
+                    if (pipe.x + pipeWidth <= 0) {
+                        pipes.splice(index, 1);
+                        currentScore++;
+                    }
+                });
+
+                pipes.forEach(pipe => {
+                    if (birdX + birdWidth > pipe.x && birdX < pipe.x + pipeWidth) {
+                        if (birdY < pipe.top || birdY + birdHeight > pipe.top + pipeGap) {
+                            endGame();
+                        }
+                    }
+                });
+
+                ctxFlappy.clearRect(0, 0, canvasFlappy.width, canvasFlappy.height);
+                drawBird();
+                drawPipes();
+                ctxFlappy.fillStyle = "#000";
+                ctxFlappy.font = "20px Arial";
+                ctxFlappy.fillText("Score: " + currentScore, 10, 30);
             }
-        });
 
-        // Update scores
-        if (currentScore > highScore) {
-            highScore = currentScore;
-            localStorage.setItem("flappyHighScore", highScore);
-        }
+            function endGame() {
+                alert("Game Over!");
+                currentScore = 0;
+                pipes = [];
+                birdY = canvasFlappy.height / 2;
+                birdVelocity = 0;
+                gameStarted = false;
+                autoFlyTime = 0;
+            }
 
-        // Draw everything
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBird();
-        drawPipes();
-        drawScores();
+            function gameLoop() {
+                updateGame();
+                requestAnimationFrame(gameLoop);
+            }
+
+            window.addEventListener("keydown", (e) => {
+                if (e.key === " " || e.key === "ArrowUp") {
+                    birdFlap = true;
+                }
+            });
+
+            window.addEventListener("touchstart", () => {
+                birdFlap = true;
+            });
+
+            gameLoop();
+        </script>`;
     }
 
-    // Draw the score board
-    function drawScores() {
-        document.getElementById('current-score').textContent = currentScore;
-        document.getElementById('high-score').textContent = highScore;
+    // Memory Game
+    function memoryGame() {
+        return `
+        <div id="memory-game" style="display: flex; flex-wrap: wrap; justify-content: center; width: 300px; margin: auto;">
+            <script>
+                const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+                const cards = [...colors, ...colors];
+                let flippedCards = [];
+                let matchedPairs = 0;
+                let moves = 0;
+
+                function shuffle(array) {
+                    return array.sort(() => Math.random() - 0.5);
+                }
+
+                function createBoard() {
+                    const gameBoard = document.getElementById('memory-game');
+                    shuffle(cards).forEach(color => {
+                        const card = document.createElement('div');
+                        card.classList.add('card');
+                        card.style.width = '50px';
+                        card.style.height = '50px';
+                        card.style.margin = '5px';
+                        card.style.backgroundColor = 'gray';
+                        card.style.display = 'flex';
+                        card.style.justifyContent = 'center';
+                        card.style.alignItems = 'center';
+                        card.style.cursor = 'pointer';
+                        card.dataset.color = color;
+                        card.addEventListener('click', flipCard);
+                        gameBoard.appendChild(card);
+                    });
+                }
+
+                function flipCard(event) {
+                    const card = event.target;
+                    if (flippedCards.length < 2 && !card.classList.contains('flipped')) {
+                        card.style.backgroundColor = card.dataset.color;
+                        card.classList.add('flipped');
+                        flippedCards.push(card);
+
+                        if (flippedCards.length === 2) {
+                            moves++;
+                            setTimeout(checkMatch, 800);
+                        }
+                    }
+                }
+
+                function checkMatch() {
+                    if (flippedCards[0].dataset.color === flippedCards[1].dataset.color) {
+                        matchedPairs++;
+                    } else {
+                        flippedCards[0].style.backgroundColor = 'gray';
+                        flippedCards[1].style.backgroundColor = 'gray';
+                        flippedCards[0].classList.remove('flipped');
+                        flippedCards[1].classList.remove('flipped');
+                    }
+
+                    flippedCards = [];
+                    if (matchedPairs === colors.length) {
+                        alert('You Win! Moves: ' + moves);
+                    }
+                }
+
+                createBoard();
+            </script>
+        </div>`;
     }
 
-    // End the game and reset score
-    function endGame() {
-        alert("Game Over!");
-        currentScore = 0;
-        pipes = [];
-        birdY = canvas.height / 2;
-        birdVelocity = 0;
-        gameStarted = false;
-        autoFlyTime = 0;
+    // Pong Game
+    function pongGame() {
+        return `
+        <canvas id="pongCanvas" width="100%" height="400px"></canvas>
+        <script>
+            const canvasPong = document.getElementById('pongCanvas');
+            const ctxPong = canvasPong.getContext('2d');
+            canvasPong.width = window.innerWidth;
+            canvasPong.height = 400;
+
+            const paddleWidth = 100, paddleHeight = 10, ballSize = 10;
+            let paddleX = canvasPong.width / 2 - paddleWidth / 2;
+            let paddleSpeed = 5;
+            let ballX = canvasPong.width / 2, ballY = canvasPong.height / 2;
+            let ballDX = 2, ballDY = 2;
+            let leftPressed = false, rightPressed = false;
+
+            function drawBall() {
+                ctxPong.beginPath();
+                ctxPong.arc(ballX, ballY, ballSize, 0, Math.PI * 2);
+                ctxPong.fillStyle = "#0095DD";
+                ctxPong.fill();
+                ctxPong.closePath();
+            }
+
+            function drawPaddle() {
+                ctxPong.beginPath();
+                ctxPong.rect(paddleX, canvasPong.height - paddleHeight, paddleWidth, paddleHeight);
+                ctxPong.fillStyle = "#0095DD";
+                ctxPong.fill();
+                ctxPong.closePath();
+            }
+
+            function moveBall() {
+                ballX += ballDX;
+                ballY += ballDY;
+
+                if (ballX + ballSize > canvasPong.width || ballX - ballSize < 0) {
+                    ballDX = -ballDX;
+                }
+
+                if (ballY - ballSize < 0) {
+                    ballDY = -ballDY;
+                } else if (ballY + ballSize > canvasPong.height - paddleHeight) {
+                    if (ballX > paddleX && ballX < paddleX + paddleWidth) {
+                        ballDY = -ballDY;
+                    } else {
+                        alert("Game Over");
+                        document.location.reload();
+                    }
+                }
+            }
+
+            function movePaddle() {
+                if (leftPressed && paddleX > 0) {
+                    paddleX -= paddleSpeed;
+                }
+                if (rightPressed && paddleX < canvasPong.width - paddleWidth) {
+                    paddleX += paddleSpeed;
+                }
+            }
+
+            function keyDownHandler(e) {
+                if (e.key === "ArrowLeft") {
+                    leftPressed = true;
+                } else if (e.key === "ArrowRight") {
+                    rightPressed = true;
+                }
+            }
+
+            function keyUpHandler(e) {
+                if (e.key === "ArrowLeft") {
+                    leftPressed = false;
+                } else if (e.key === "ArrowRight") {
+                    rightPressed = false;
+                }
+            }
+
+            function draw() {
+                ctxPong.clearRect(0, 0, canvasPong.width, canvasPong.height);
+                drawBall();
+                drawPaddle();
+                moveBall();
+                movePaddle();
+            }
+
+            window.addEventListener("keydown", keyDownHandler);
+            window.addEventListener("keyup", keyUpHandler);
+
+            setInterval(draw, 10);
+        </script>`;
     }
 
-    // Start the game loop
-    function gameLoop() {
-        updateGame();
-        requestAnimationFrame(gameLoop);
-    }
+    // Tic Tac Toe Game
+    function ticTacToeGame() {
+        return `
+        <div id="ticTacToe" style="display: flex; flex-wrap: wrap; justify-content: center; width: 300px; margin: auto;">
+            <script>
+                const board = ['','','','','','','','',''];
+                let currentPlayer = 'X';
+                let gameOver = false;
 
-    // Handle user input
-    window.addEventListener("keydown", (e) => {
-        if (e.key === " " || e.key === "ArrowUp") {
-            birdFlap = true;
-        }
-    });
+                function renderBoard() {
+                    const ticTacToe = document.getElementById('ticTacToe');
+                    ticTacToe.innerHTML = '';
+                    board.forEach((cell, index) => {
+                        const cellDiv = document.createElement('div');
+                        cellDiv.style.width = '80px';
+                        cellDiv.style.height = '80px';
+                        cellDiv.style.display = 'flex';
+                        cellDiv.style.justifyContent = 'center';
+                        cellDiv.style.alignItems = 'center';
+                        cellDiv.style.border = '1px solid black';
+                        cellDiv.style.fontSize = '24px';
+                        cellDiv.style.cursor = 'pointer';
+                        cellDiv.textContent = cell;
+                        cellDiv.addEventListener('click', () => makeMove(index));
+                        ticTacToe.appendChild(cellDiv);
+                    });
+                }
 
-    window.addEventListener("touchstart", (e) => {
-        birdFlap = true;
-    });
+                function makeMove(index) {
+                    if (board[index] === '' && !gameOver) {
+                        board[index] = currentPlayer;
+                        if (checkWinner()) {
+                            alert(currentPlayer + ' wins!');
+                            gameOver = true;
+                        }
+                        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                        renderBoard();
+                    }
+                }
 
-    // Resize canvas on window resize
-    window.addEventListener("resize", () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    });
+                function checkWinner() {
+                    const winningCombinations = [
+                        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                        [0, 4, 8], [2, 4, 6]
+                    ];
+                    for (const [a, b, c] of winningCombinations) {
+                        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
 
-    // Start the game
-    gameLoop();
-</script>
-
-</body>
-</html>
+                renderBoard
