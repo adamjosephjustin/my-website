@@ -25,9 +25,43 @@
             border: 2px solid #fff;
             background: #000;
         }
+
+        .scoreboard {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 20px;
+            padding: 0 20px;
+        }
+
+        .player {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            canvas {
+                width: 100%;
+                height: auto;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="scoreboard">
+        <div class="player">
+            <span>Adam</span>
+            <span id="scoreLeft">0</span>
+        </div>
+        <div class="player">
+            <span>Justin</span>
+            <span id="scoreRight">0</span>
+        </div>
+    </div>
     <canvas id="pongCanvas"></canvas>
 
     <script>
@@ -36,8 +70,8 @@
 
         // Adjust canvas size based on screen size
         const resizeCanvas = () => {
-            canvas.width = window.innerWidth * 0.8;
-            canvas.height = window.innerHeight * 0.6;
+            canvas.width = Math.min(window.innerWidth * 0.9, 800);
+            canvas.height = Math.min(window.innerHeight * 0.6, 400);
         };
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
@@ -53,6 +87,9 @@
         const leftPaddle = { x: 0, y: canvas.height / 2 - paddleHeight / 2 };
         const rightPaddle = { x: canvas.width - paddleWidth, y: canvas.height / 2 - paddleHeight / 2 };
         const ball = { x: canvas.width / 2, y: canvas.height / 2 };
+
+        let scoreLeft = 0;
+        let scoreRight = 0;
 
         // Game controls
         const keys = {};
@@ -109,11 +146,28 @@
                 ballSpeedX *= -1;
             }
 
-            if (ball.x - ballRadius < 0 || ball.x + ballRadius > canvas.width) {
-                ball.x = canvas.width / 2;
-                ball.y = canvas.height / 2;
-                ballSpeedX *= -1;
+            if (ball.x - ballRadius < 0) {
+                scoreRight++;
+                resetBall();
+                updateScore();
             }
+
+            if (ball.x + ballRadius > canvas.width) {
+                scoreLeft++;
+                resetBall();
+                updateScore();
+            }
+        };
+
+        const resetBall = () => {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ballSpeedX *= -1;
+        };
+
+        const updateScore = () => {
+            document.getElementById('scoreLeft').textContent = scoreLeft;
+            document.getElementById('scoreRight').textContent = scoreRight;
         };
 
         const render = () => {
