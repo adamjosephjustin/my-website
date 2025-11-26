@@ -3,57 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L14: If the Number is...</title>
+    <title>L15: The Final Code</title>
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
     <header class="academy-header">
-        <h1>Lesson 14: If the Number is...</h1>
+        <h1>Lesson 15: The Final Code</h1>
         <p><a href="../index.html" style="color: var(--color-accent);">← Back to Course Index</a></p>
     </header>
 
     <div class="lesson-page-container">
-        <p><strong>Goal:</strong> Write the **`if` statement** in Python. The code should only run if the number is **less than 5**.</p>
+        <p><strong>Goal:</strong> Write a 3-line Python program! It needs to **get your name**, **store it in a variable**, and then **print a final greeting**.</p>
         
         <div class="game-area">
-            <h3 style="color: #34495E;">Python Code:</h3>
-            <div style="background-color: #34495E; color: white; padding: 10px; border-radius: 5px; font-family: monospace; text-align: left;">
-                `number = 3` <br>
-                `if` <input type="text" id="if-input" placeholder="number < 5:" style="width: 120px; padding: 5px; font-family: monospace;">
-                <br>
-                `    print("It is small!")`
+            <h3 style="color: #34495E;">Your Python Challenge:</h3>
+            <div style="background-color: #34495E; color: white; padding: 15px; border-radius: 5px; font-family: monospace; text-align: left; line-height: 1.6;">
+                1. `name = input("What is your name? ")` <br>
+                2. `greeting = "Hello " + name + "!"` <br>
+                3. <input type="text" id="final-code-input" placeholder="print(greeting)" style="width: 100%; padding: 5px; font-family: monospace;">
             </div>
             
-            <button id="check-btn" class="game-button" style="margin-top: 15px; background-color: #3498DB;">Check Syntax</button>
+            <button id="check-btn" class="game-button" style="margin-top: 15px; background-color: #2ECC71;">Check Final Line</button>
             
-            <div class="game-feedback" id="game-feedback">Type the condition in the box. Remember the **colon :** at the end!</div>
+            <div class="game-feedback" id="game-feedback">Complete the final line (3) to print the greeting variable!</div>
         </div>
         
-        <a href="#" id="next-btn" class="game-button hidden">Next Lesson →</a>
+        <a href="#" id="next-btn" class="game-button hidden">Go to Index & Claim Certificate →</a>
     </div>
 
     <script src="../js/script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            initializeLesson(14); 
+            initializeLesson(15); 
             
-            const input = document.getElementById('if-input');
+            const input = document.getElementById('final-code-input');
             const checkBtn = document.getElementById('check-btn');
             const feedback = document.getElementById('game-feedback');
 
             checkBtn.onclick = function() {
-                const answer = input.value.trim().toLowerCase(); 
+                const answer = input.value.trim().toLowerCase().replace(/\s/g, ''); 
                 
-                // Check for common correct formats
-                const correct = ['number<5:', 'number < 5:'];
+                // Check for common correct formats (print(greeting) or print(greeting))
+                const correct = ['print(greeting)', 'print("greeting")'.replace(/"/g, '')];
 
                 if (correct.includes(answer)) {
-                    feedback.innerText = "🎉 PERFECT! You included the comparison (<) and the colon (:). The condition works!";
+                    feedback.innerText = "🎉 COURSE COMPLETE! You successfully combined variables, input, and print!";
                     checkBtn.disabled = true;
                     input.disabled = true;
                     window.lessonSuccess();
                 } else {
-                    feedback.innerText = "❌ Incorrect syntax. Did you use `< 5` and the required colon `:`?";
+                    feedback.innerText = "❌ Incorrect. Use the `print()` function to display the `greeting` variable.";
                     feedback.style.color = '#E74C3C';
                 }
             };
