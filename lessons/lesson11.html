@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L11: Hello Python!</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="academy-header">
+        <h1>Lesson 11: Hello Python!</h1>
+        <p><a href="../index.html" style="color: var(--color-accent);">← Back to Course Index</a></p>
+    </header>
+
+    <div class="lesson-page-container">
+        <p><strong>Goal:</strong> Learn the most basic Python command: **`print()`**! Type the command to make the computer say "Hello Adam!".</p>
+        
+        <div class="game-area">
+            <h3 style="color: #34495E;">Python Console:</h3>
+            <div id="output-area" style="background-color: #2C3E50; color: #2ECC71; padding: 10px; border-radius: 5px; font-family: monospace; min-height: 40px; text-align: left;">
+                &gt;&gt;&gt;
+            </div>
+            
+            <input type="text" id="code-input" placeholder='Type: print("Hello Adam!")' style="width: 80%; padding: 10px; margin-top: 15px; font-family: monospace;">
+            
+            <button id="run-code-btn" class="game-button" style="margin-top: 15px; background-color: #3498DB;">Run Code</button>
+            
+            <div class="game-feedback" id="game-feedback">Type the command in the box and click 'Run Code'. Don't forget the quotes and parentheses!</div>
+        </div>
+        
+        <a href="#" id="next-btn" class="game-button hidden">Next Lesson →</a>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLesson(11); 
+            
+            const input = document.getElementById('code-input');
+            const runBtn = document.getElementById('run-code-btn');
+            const output = document.getElementById('output-area');
+            const feedback = document.getElementById('game-feedback');
+
+            runBtn.onclick = function() {
+                const code = input.value.trim().toLowerCase().replace(/\s/g, ''); // Remove all spaces for simple checking
+                
+                if (code.includes('print("helloadam!")')) {
+                    output.innerHTML += '<br>' + input.value;
+                    output.innerHTML += '<br>Hello Adam!';
+                    feedback.innerText = "🎉 SUCCESS! Your print() command worked!";
+                    runBtn.disabled = true;
+                    window.lessonSuccess();
+                } else {
+                    output.innerHTML += '<br>' + input.value;
+                    output.innerHTML += '<br><span style="color: #E74C3C;">SyntaxError: Did you use print(), quotes "", and parentheses ()?</span>';
+                    feedback.innerText = "❌ Keep trying! Check your spelling and punctuation.";
+                }
+            };
+        });
+    </script>
+</body>
+</html>
