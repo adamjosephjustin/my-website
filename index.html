@@ -3,485 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adam's Academy - Junior Coding</title>
-    <style>
-        :root {
-            --primary: #FF6B6B;
-            --secondary: #4ECDC4;
-            --accent: #FFE66D;
-            --dark: #2C3E50;
-            --light: #F7F9FC;
-        }
-
-        body {
-            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
-            background-color: var(--light);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            color: var(--dark);
-        }
-
-        header {
-            background-color: var(--primary);
-            color: white;
-            width: 100%;
-            text-align: center;
-            padding: 1rem;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-        }
-
-        h1 { margin: 0; font-size: 2rem; }
-        
-        #game-container {
-            background: white;
-            width: 90%;
-            max-width: 600px;
-            margin-top: 20px;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            text-align: center;
-            border: 5px solid var(--secondary);
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: #eee;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--secondary);
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-
-        .lesson-title { color: var(--primary); }
-        
-        .game-area {
-            background: #f0f4f8;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
-            min-height: 200px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-size: 3rem;
-        }
-
-        button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            border-radius: 50px;
-            cursor: pointer;
-            font-family: inherit;
-            margin: 10px;
-            transition: transform 0.1s, box-shadow 0.1s;
-            box-shadow: 0 4px 0 #c0392b;
-        }
-
-        button:active {
-            transform: translateY(4px);
-            box-shadow: none;
-        }
-
-        button.choice-btn {
-            background: var(--secondary);
-            box-shadow: 0 4px 0 #2980b9;
-        }
-
-        .hidden { display: none; }
-
-        /* Certificate Styles */
-        #certificate-view {
-            border: 10px double var(--primary);
-            padding: 40px;
-            background: #fff;
-            background-image: radial-gradient(var(--accent) 15%, transparent 16%), radial-gradient(var(--accent) 15%, transparent 16%);
-            background-size: 20px 20px;
-        }
-        
-        .cert-header { font-size: 3rem; color: var(--primary); margin-bottom: 10px; }
-        .cert-text { font-size: 1.5rem; margin: 20px 0; }
-        .cert-name { 
-            font-size: 2.5rem; 
-            color: var(--dark); 
-            border-bottom: 3px solid var(--dark); 
-            display: inline-block;
-            min-width: 300px;
-            font-family: cursive;
-        }
-
-        /* Animation for success */
-        @keyframes pop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-        .pop-anim { animation: pop 0.3s ease; }
-
-    </style>
+    <title>Adam's World: The Junior Coding Academy</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <header>
-        <h1>🤖 Adam's Academy</h1>
+    <header class="academy-header">
+        <h1>Welcome to Adam's World 🌎</h1>
+        <h2>The Junior Coding Academy</h2>
+        <p>Start your journey from Logic Puzzles to Python basics and earn your certificates!</p>
     </header>
 
-    <div id="game-container">
-        
-        <div id="intro-screen">
-            <h2>Welcome, Future Coder!</h2>
-            <p>Help the Robot 🤖 solve 10 puzzles to get your certificate!</p>
-            <input type="text" id="student-name" placeholder="Enter your name here" style="padding: 10px; font-size: 1.2rem; border-radius: 10px; border: 2px solid #ccc;">
-            <br><br>
-            <button onclick="startGame()">Start Coding!</button>
-        </div>
-
-        <div id="lesson-screen" class="hidden">
-            <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
-            <h2 id="lesson-title" class="lesson-title">Lesson 1</h2>
-            <p id="lesson-instruction">Instruction goes here</p>
-            
-            <div id="game-area" class="game-area">
-                </div>
-            
-            <div id="feedback" style="height: 30px; color: var(--primary); font-weight: bold;"></div>
-        </div>
-
-        <div id="certificate-screen" class="hidden">
-            <div id="certificate-view">
-                <div class="cert-header">🏆 Certificate of Completion 🏆</div>
-                <div class="cert-text">This certifies that</div>
-                <div class="cert-name" id="cert-name-display">Student</div>
-                <div class="cert-text">Has successfully completed the<br>Junior Coding Course</div>
-                <div class="cert-text">at <strong>Adam's Academy</strong></div>
-                <div style="font-size: 4rem; margin-top: 20px;">🤖⭐⭐⭐</div>
+    <main class="course-index">
+        <section class="certificate-track" id="beginner-track">
+            <h3 class="track-title beginner-color">🥇 Beginner Certificate: Logic Puzzles (L1-L5)</h3>
+            <p class="track-status">Status: <span id="status-beginner">Not Started</span></p>
+            <div class="lesson-grid">
+                <a href="lessons/lesson1.html" class="lesson-card">L1: Robot Path</a>
+                <a href="#" class="lesson-card locked">L2: Where to Go?</a>
+                <a href="#" class="lesson-card locked">L3: Fixing the Wire</a>
+                <a href="#" class="lesson-card locked">L4: Repeating Dance</a>
+                <a href="#" class="lesson-card locked">L5: The Blueprint</a>
             </div>
-            <br>
-            <button onclick="window.print()">Print Certificate</button>
-        </div>
+            <button class="cert-btn hidden" id="cert-beginner" onclick="showCertificate('Beginner')">Claim Certificate!</button>
+        </section>
 
+        <section class="certificate-track" id="intermediate-track">
+            <h3 class="track-title intermediate-color">🥈 Intermediate Certificate: Coding Basics (L6-L10)</h3>
+            <p class="track-status">Status: <span id="status-intermediate">Locked</span></p>
+            <div class="lesson-grid">
+                <a href="#" class="lesson-card locked">L6: Counting Game</a>
+                <a href="#" class="lesson-card locked">L7: True or False</a>
+                <a href="#" class="lesson-card locked">L8: List of Toys</a>
+                <a href="#" class="lesson-card locked">L9: Missing Step</a>
+                <a href="#" class="lesson-card locked">L10: Building a Shape</a>
+            </div>
+            <button class="cert-btn hidden" id="cert-intermediate" onclick="showCertificate('Intermediate')">Claim Certificate!</button>
+        </section>
+
+        <section class="certificate-track" id="pro-track">
+            <h3 class="track-title pro-color">🥉 Professional Certificate: Python Intro (L11-L15)</h3>
+            <p class="track-status">Status: <span id="status-pro">Locked</span></p>
+            <div class="lesson-grid">
+                <a href="#" class="lesson-card locked">L11: Hello Python!</a>
+                <a href="#" class="lesson-card locked">L12: Keyboard Talk</a>
+                <a href="#" class="lesson-card locked">L13: Math Machines</a>
+                <a href="#" class="lesson-card locked">L14: If the Number...</a>
+                <a href="#" class="lesson-card locked">L15: Final Code</a>
+            </div>
+            <button class="cert-btn hidden" id="cert-pro" onclick="showCertificate('Professional')">Claim Certificate!</button>
+        </section>
+    </main>
+
+    <div id="certificate-modal" class="modal-backdrop hidden" onclick="hideCertificate()">
+        <div class="certificate-box" id="certificate-content" onclick="event.stopPropagation()">
+            </div>
     </div>
 
+    <script src="js/script.js"></script>
     <script>
-        // State
-        let currentLesson = 0;
-        let userName = "";
-        
-        // Curriculum Data
-        const lessons = [
-            {
-                title: "1. Hello World!",
-                instruction: "Coding starts with an input. Click the Green Button to wake up the robot!",
-                type: "simple_click",
-                content: "🤖 💤",
-                target: "WAKE UP",
-                correctContent: "🤖 👋 Hello!",
-                color: "#2ecc71"
-            },
-            {
-                title: "2. Sequence",
-                instruction: "Code runs in order. Click '1', then '2', then '3' to launch the rocket.",
-                type: "sequence",
-                sequenceNeeded: [1, 2, 3],
-                display: "🚀"
-            },
-            {
-                title: "3. Debugging",
-                instruction: "The robot has a bug! It is red. Click it to fix it and turn it green.",
-                type: "debug",
-                content: "🤖",
-                isBroken: true
-            },
-            {
-                title: "4. Loops",
-                instruction: "A loop repeats things. Click the 'Jump' button 3 times!",
-                type: "loop",
-                requiredClicks: 3,
-                content: "🏃"
-            },
-            {
-                title: "5. Logic (If/Else)",
-                instruction: "If the fruit is Apple 🍎, click 'Eat'. If it is a Bomb 💣, click 'Avoid'.",
-                type: "logic",
-                scenario: "apple" // randomly generated in logic
-            },
-            {
-                title: "6. Directions",
-                instruction: "Guide the car to the house. Click: Right ➡, then Up ⬆.",
-                type: "sequence_direction",
-                sequenceNeeded: ["➡", "⬆"],
-                display: "🚗 ... 🏠"
-            },
-            {
-                title: "7. Variables",
-                instruction: "A variable holds information. The box holds a Star. Click the box to see what's inside!",
-                type: "variable",
-                content: "📦"
-            },
-            {
-                title: "8. Functions",
-                instruction: "A Function does many things at once. Click 'Dance' to make the robot Sing AND Move.",
-                type: "function",
-                content: "🤖"
-            },
-            {
-                title: "9. Binary",
-                instruction: "Computers speak in 0 and 1. Turn the switch from 0 (Off) to 1 (On).",
-                type: "binary",
-                state: 0
-            },
-            {
-                title: "10. Final Project",
-                instruction: "Write the code! Click 'Code', then 'Test', then 'Launch'!",
-                type: "sequence_word",
-                sequenceNeeded: ["Code", "Test", "Launch"],
-                display: "💻"
-            }
-        ];
-
-        // --- Core Functions ---
-
-        function startGame() {
-            const input = document.getElementById('student-name');
-            if(input.value.trim() === "") {
-                alert("Please enter your name!");
-                return;
-            }
-            userName = input.value;
-            document.getElementById('intro-screen').classList.add('hidden');
-            document.getElementById('lesson-screen').classList.remove('hidden');
-            loadLesson();
-        }
-
-        function loadLesson() {
-            const lesson = lessons[currentLesson];
-            document.getElementById('lesson-title').innerText = lesson.title;
-            document.getElementById('lesson-instruction').innerText = lesson.instruction;
-            document.getElementById('progress').style.width = ((currentLesson) / lessons.length * 100) + "%";
-            document.getElementById('feedback').innerText = "";
-
-            const area = document.getElementById('game-area');
-            area.innerHTML = ''; // Clear previous
-
-            // Build Game Interface based on Type
-            if (lesson.type === 'simple_click') {
-                area.innerHTML = `<div id="robot-display">${lesson.content}</div>`;
-                const btn = document.createElement('button');
-                btn.innerText = lesson.target;
-                btn.style.backgroundColor = lesson.color;
-                btn.onclick = () => {
-                    document.getElementById('robot-display').innerText = lesson.correctContent;
-                    success();
-                };
-                area.appendChild(btn);
-            }
-            else if (lesson.type === 'sequence') {
-                area.innerHTML = `<div style="margin-bottom:20px">${lesson.display}</div><div id="seq-container"></div>`;
-                let step = 0;
-                [2, 1, 3].forEach(num => { // Scramble buttons visual order, logic checks actual number
-                    let btn = document.createElement('button');
-                    btn.innerText = num;
-                    btn.className = "choice-btn";
-                    btn.onclick = () => {
-                        if (num === lesson.sequenceNeeded[step]) {
-                            step++;
-                            btn.style.opacity = 0.5;
-                            btn.disabled = true;
-                            if(step === 3) success();
-                        } else {
-                            fail("Oops! Start with 1, then 2, then 3.");
-                            step = 0;
-                            // Reset buttons (simplification for UI)
-                            loadLesson();
-                        }
-                    };
-                    document.getElementById('seq-container').appendChild(btn);
-                }); // Note: Buttons displayed out of order (2,1,3) to force reading, but logic checks value.
-            }
-            else if (lesson.type === 'debug') {
-                let robot = document.createElement('div');
-                robot.innerText = "🤖";
-                robot.style.color = "red";
-                robot.style.cursor = "pointer";
-                robot.onclick = () => {
-                    robot.style.color = "#2ecc71"; // Green
-                    robot.innerText = "🤖 Fixed!";
-                    success();
-                };
-                area.appendChild(robot);
-            }
-            else if (lesson.type === 'loop') {
-                let count = 0;
-                let display = document.createElement('div');
-                display.innerText = lesson.content;
-                area.appendChild(display);
-                
-                let btn = document.createElement('button');
-                btn.innerText = "Jump";
-                btn.onclick = () => {
-                    display.classList.remove("pop-anim");
-                    void display.offsetWidth; // trigger reflow
-                    display.classList.add("pop-anim");
-                    count++;
-                    document.getElementById('feedback').innerText = `Jumped ${count} times!`;
-                    if(count >= 3) success();
-                };
-                area.appendChild(btn);
-            }
-            else if (lesson.type === 'logic') {
-                // Randomize logic
-                let isApple = Math.random() < 0.5;
-                let item = isApple ? "🍎" : "💣";
-                
-                let display = document.createElement('div');
-                display.innerText = item;
-                area.appendChild(display);
-
-                let btn1 = document.createElement('button');
-                btn1.innerText = "Eat";
-                btn1.className = "choice-btn";
-                btn1.onclick = () => isApple ? success() : fail("Oh no! Don't eat bombs!");
-
-                let btn2 = document.createElement('button');
-                btn2.innerText = "Avoid";
-                btn2.className = "choice-btn";
-                btn2.style.backgroundColor = "#e74c3c";
-                btn2.onclick = () => !isApple ? success() : fail("You should eat the apple!");
-
-                area.appendChild(btn1);
-                area.appendChild(btn2);
-            }
-            else if (lesson.type === 'sequence_direction') {
-                area.innerHTML = `<div>${lesson.display}</div><div id="btn-holder"></div>`;
-                let userSeq = [];
-                const correct = lesson.sequenceNeeded;
-                
-                ["⬆", "⬇", "⬅", "➡"].forEach(dir => {
-                    let btn = document.createElement('button');
-                    btn.innerText = dir;
-                    btn.className = "choice-btn";
-                    btn.onclick = () => {
-                        userSeq.push(dir);
-                        document.getElementById('feedback').innerText = userSeq.join(" ");
-                        if(userSeq.length === correct.length) {
-                            if(JSON.stringify(userSeq) === JSON.stringify(correct)) success();
-                            else {
-                                fail("Wrong path! Try again.");
-                                userSeq = [];
-                            }
-                        }
-                    };
-                    document.getElementById('btn-holder').appendChild(btn);
-                });
-            }
-            else if (lesson.type === 'variable') {
-                let box = document.createElement('button');
-                box.innerText = "📦";
-                box.style.fontSize = "5rem";
-                box.style.background = "none";
-                box.style.border = "none";
-                box.style.boxShadow = "none";
-                box.onclick = () => {
-                    box.innerText = "⭐";
-                    success();
-                };
-                area.appendChild(box);
-            }
-            else if (lesson.type === 'function') {
-                let robot = document.createElement('div');
-                robot.innerText = "🤖";
-                area.appendChild(robot);
-                
-                let btn = document.createElement('button');
-                btn.innerText = "Dance Function";
-                btn.onclick = () => {
-                    robot.innerText = "🎵 💃 🎵";
-                    success();
-                };
-                area.appendChild(btn);
-            }
-            else if (lesson.type === 'binary') {
-                let state = 0;
-                let display = document.createElement('div');
-                display.innerText = "0";
-                display.style.fontFamily = "monospace";
-                area.appendChild(display);
-
-                let btn = document.createElement('button');
-                btn.innerText = "Toggle Switch";
-                btn.onclick = () => {
-                    state = state === 0 ? 1 : 0;
-                    display.innerText = state;
-                    display.style.color = state === 1 ? "#2ecc71" : "#dark";
-                    if(state === 1) success();
-                };
-                area.appendChild(btn);
-            }
-            else if (lesson.type === 'sequence_word') {
-                area.innerHTML = `<div>${lesson.display}</div><div id="wrd-container"></div>`;
-                let step = 0;
-                // Shuffle display
-                let words = ["Test", "Launch", "Code"]; 
-                words.forEach(word => {
-                    let btn = document.createElement('button');
-                    btn.innerText = word;
-                    btn.className = "choice-btn";
-                    btn.onclick = () => {
-                        if (word === lesson.sequenceNeeded[step]) {
-                            step++;
-                            btn.style.backgroundColor = "#2ecc71";
-                            if(step === 3) success();
-                        } else {
-                            fail("Order: Code -> Test -> Launch");
-                            step = 0;
-                            loadLesson();
-                        }
-                    };
-                    document.getElementById('wrd-container').appendChild(btn);
-                });
-            }
-        }
-
-        function success() {
-            document.getElementById('feedback').innerText = "🎉 CORRECT! 🎉";
-            document.getElementById('feedback').style.color = "#2ecc71";
-            
-            setTimeout(() => {
-                currentLesson++;
-                if (currentLesson < lessons.length) {
-                    loadLesson();
-                } else {
-                    showCertificate();
-                }
-            }, 1500);
-        }
-
-        function fail(msg) {
-            document.getElementById('feedback').innerText = msg;
-            document.getElementById('feedback').style.color = "#e74c3c";
-        }
-
-        function showCertificate() {
-            document.getElementById('lesson-screen').classList.add('hidden');
-            document.getElementById('certificate-screen').classList.remove('hidden');
-            document.getElementById('cert-name-display').innerText = userName;
-            // Trigger confetti or sound here if desired
-        }
-
+        // Initialize state on load
+        document.addEventListener('DOMContentLoaded', updateCourseIndex);
     </script>
 </body>
 </html>
