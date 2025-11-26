@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L13: Math Machines</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="academy-header">
+        <h1>Lesson 13: Math Machines</h1>
+        <p><a href="../index.html" style="color: var(--color-accent);">← Back to Course Index</a></p>
+    </header>
+
+    <div class="lesson-page-container">
+        <p><strong>Goal:</strong> Python is a great calculator! Use the **`*` (multiply)** operator to solve the problem: **2 boxes of 5 apples.**</p>
+        
+        <div class="game-area">
+            <h3 style="color: #34495E;">The Python Problem:</h3>
+            <div style="font-size: 2rem; margin: 15px 0;">2 🍎 x 5 = ?</div>
+            
+            <input type="text" id="math-input" placeholder='Type: print(2 * 5)' style="width: 80%; padding: 10px; margin-top: 15px; font-family: monospace;">
+            
+            <button id="run-code-btn" class="game-button" style="background-color: #2ECC71;">Run Calculation</button>
+
+            <div id="output-area" style="background-color: #2C3E50; color: white; padding: 10px; border-radius: 5px; font-family: monospace; min-height: 40px; margin-top: 15px; text-align: left;">
+                &gt;&gt;&gt;
+            </div>
+            
+            <div class="game-feedback" id="game-feedback">Use the asterisk `*` for multiplication inside the print() command!</div>
+        </div>
+        
+        <a href="#" id="next-btn" class="game-button hidden">Next Lesson →</a>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLesson(13); 
+            
+            const input = document.getElementById('math-input');
+            const runBtn = document.getElementById('run-code-btn');
+            const output = document.getElementById('output-area');
+            const feedback = document.getElementById('game-feedback');
+
+            runBtn.onclick = function() {
+                const code = input.value.trim().toLowerCase().replace(/\s/g, ''); 
+                
+                output.innerHTML += '<br>&gt;&gt;&gt; ' + input.value;
+                
+                if (code.includes('print(2*5)')) {
+                    output.innerHTML += '<br>10'; // Simulate correct output
+                    feedback.innerText = "🎉 CORRECT! 2 * 5 equals 10. You used the multiply operator!";
+                    runBtn.disabled = true;
+                    window.lessonSuccess();
+                } else {
+                    output.innerHTML += '<br><span style="color: #E74C3C;">SyntaxError: Check your numbers and the asterisk * operator.</span>';
+                    feedback.innerText = "❌ Try again! Make sure the numbers and the `*` are in the parentheses.";
+                }
+            };
+        });
+    </script>
+</body>
+</html>
