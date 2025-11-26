@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L8: List of Toys</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="academy-header">
+        <h1>Lesson 8: List of Toys</h1>
+        <p><a href="../index.html" style="color: var(--color-accent);">← Back to Course Index</a></p>
+    </header>
+
+    <div class="lesson-page-container">
+        <p><strong>Goal:</strong> An **Array** (or List) stores multiple items in order. Put the three toys in the list by clicking them!</p>
+        
+        <div class="game-area">
+            <h3 style="color: var(--color-primary);">The Toys:</h3>
+            <div id="toy-pile" style="font-size: 3rem; margin-bottom: 20px;">
+                🧸 ⚽ 🚀
+            </div>
+
+            <h3 style="color: var(--color-secondary);">The List (Array):</h3>
+            <div id="toy-list" style="font-size: 1.5rem; border: 2px dashed #ccc; padding: 10px; min-height: 50px; width: 80%; text-align: left;">
+                [1] (Empty) | [2] (Empty) | [3] (Empty)
+            </div>
+            
+            <div class="game-feedback" id="game-feedback">Click the toys in the order: Bear, Ball, Rocket.</div>
+        </div>
+        
+        <a href="#" id="next-btn" class="game-button hidden">Next Lesson →</a>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLesson(8); 
+            
+            const toys = [
+                { emoji: "🧸", target: 0 },
+                { emoji: "⚽", target: 1 },
+                { emoji: "🚀", target: 2 }
+            ];
+            let currentList = [];
+            const toyPile = document.getElementById('toy-pile');
+            const toyListDisplay = document.getElementById('toy-list');
+            const feedback = document.getElementById('game-feedback');
+
+            function updateListDisplay() {
+                toyListDisplay.innerHTML = currentList.map((item, index) => 
+                    `[${index + 1}] ${item.emoji}`
+                ).join(' | ');
+                
+                // Fill remaining spots
+                for (let i = currentList.length; i < 3; i++) {
+                     toyListDisplay.innerHTML += ` | [${i + 1}] (Empty)`;
+                }
+            }
+
+            // Create clickable toys
+            toyPile.innerHTML = '';
+            toys.forEach((toy, index) => {
+                const span = document.createElement('span');
+                span.innerText = toy.emoji;
+                span.style.margin = '0 10px';
+                span.style.cursor = 'pointer';
+                span.onclick = function() {
+                    if (currentList.length < 3) {
+                        // Check if the clicked toy is the next in the required sequence (Bear, Ball, Rocket)
+                        if (index === currentList.length) {
+                            currentList.push(toy);
+                            updateListDisplay();
+                            span.style.opacity = 0.3;
+                            span.onclick = null; // Disable the collected toy
+                            feedback.innerText = `Toy ${currentList.length} collected!`;
+
+                            if (currentList.length === 3) {
+                                feedback.innerText = "🎉 LIST COMPLETE! You stored 3 items in the Array!";
+                                window.lessonSuccess();
+                            }
+                        } else {
+                            feedback.innerText = "❌ Wrong order! Click the next toy in the sequence (Bear, Ball, Rocket).";
+                        }
+                    }
+                };
+                toyPile.appendChild(span);
+            });
+
+            updateListDisplay(); // Initial display
+        });
+    </script>
+</body>
+</html>
