@@ -22,8 +22,14 @@
             box-sizing: border-box;
             font-size: 0.8rem;
             color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .grid-cell.filled { background-color: var(--color-primary); }
+        .grid-cell.filled { 
+            background-color: var(--color-primary); 
+            transition: background-color 0.3s;
+        }
     </style>
 </head>
 <body>
@@ -33,7 +39,7 @@
     </header>
 
     <div class="lesson-page-container">
-        <p><strong>Goal:</strong> Combine **Sequencing** and **Loops**! Draw a small blue square (4 sides) on the grid.</p>
+        <p><strong>Goal:</strong> Combine **Sequencing** and **Loops**! Draw a small 2x2 blue square on the grid by moving the robot 🤖 and filling cells.</p>
         
         <div class="game-area">
             <h3 style="color: var(--color-primary);">The Canvas:</h3>
@@ -51,14 +57,14 @@
                 <div class="grid-cell" data-row="2" data-col="2"></div>
             </div>
             
-            <p><strong>Instructions:</strong> Use the commands to fill the **4** center cells to make a 2x2 square. (Cells 1,1; 1,2; 2,1; 2,2)</p>
+            <p><strong>Instructions:</strong> Start at **(0, 0)**. You must fill cells **(1,1), (1,2), (2,1), (2,2)** to make a square!</p>
             
             <button id="fill-cell-btn" class="game-button">Fill Cell 🎨</button>
             <button id="move-right-btn" class="game-button">Move Right →</button>
             <button id="move-down-btn" class="game-button">Move Down ↓</button>
-            <button id="run-code-btn" class="game-button" style="background-color: #2C3E50;">Check Drawing</button>
+            <button id="reset-btn" class="game-button" style="background-color: #E74C3C;">Reset</button>
 
-            <div class="game-feedback" id="game-feedback">Start at cell 0,0 (top-left). Build a 2x2 square!</div>
+            <div class="game-feedback" id="game-feedback">Current Position: (0,0). Click commands to draw.</div>
         </div>
         
         <a href="#" id="next-btn" class="game-button hidden">Next Lesson →</a>
@@ -69,64 +75,56 @@
         document.addEventListener('DOMContentLoaded', () => {
             initializeLesson(10); 
             
-            const gridCells = document.querySelectorAll('.grid-cell');
             const feedback = document.getElementById('game-feedback');
+            const gridCells = document.querySelectorAll('.grid-cell');
             
             let robotPosition = { row: 0, col: 0 };
-            const drawnCells = new Set(); // Stores 'row,col' strings
+            const drawnCells = new Set();
+            const targetCells = new Set(['1,1', '1,2', '2,1', '2,2']);
 
             function updateRobotPosition() {
-                gridCells.forEach(cell => cell.style.border = '1px solid #eee');
+                gridCells.forEach(cell => cell.innerHTML = '');
+                const key = `${robotPosition.row},${robotPosition.col}`;
                 const currentCell = document.querySelector(`[data-row="${robotPosition.row}"][data-col="${robotPosition.col}"]`);
+                
                 if (currentCell) {
-                    currentCell.style.border = '3px dashed red'; // Highlight robot's location
+                    currentCell.innerHTML = '🤖';
                 }
+                feedback.innerText = `Current Position: (${key}).`;
+                checkCompletion();
             }
 
             function fillCell() {
                 const key = `${robotPosition.row},${robotPosition.col}`;
                 const currentCell = document.querySelector(`[data-row="${robotPosition.row}"][data-col="${robotPosition.col}"]`);
-                if (currentCell && !drawnCells.has(key)) {
+                
+                if (currentCell && targetCells.has(key)) {
                     currentCell.classList.add('filled');
                     drawnCells.add(key);
-                    feedback.innerText = `Cell ${key} filled!`;
+                    feedback.innerText = `Filled cell (${key})!`;
+                } else if (currentCell) {
+                    feedback.innerText = `⚠️ You filled cell (${key})! Only fill cells within the target 2x2 square.`;
                 }
+                updateRobotPosition();
             }
 
             function move(dr, dc) {
                 const newRow = Math.max(0, Math.min(2, robotPosition.row + dr));
                 const newCol = Math.max(0, Math.min(2, robotPosition.col + dc));
-                
-                if (newRow !== robotPosition.row || newCol !== robotPosition.col) {
-                    robotPosition = { row: newRow, col: newCol };
-                    updateRobotPosition();
-                    feedback.innerText = `Moved to ${newRow},${newCol}.`;
-                }
+                robotPosition = { row: newRow, col: newCol };
+                updateRobotPosition();
             }
             
-            document.getElementById('fill-cell-btn').onclick = fillCell;
-            document.getElementById('move-right-btn').onclick = () => move(0, 1);
-            document.getElementById('move-down-btn').onclick = () => move(1, 0);
+            function resetPuzzle() {
+                robotPosition = { row: 0, col: 0 };
+                drawnCells.clear();
+                gridCells.forEach(cell => cell.classList.remove('filled'));
+                document.getElementById('fill-cell-btn').disabled = false;
+                document.getElementById('move-right-btn').disabled = false;
+                document.getElementById('move-down-btn').disabled = false;
+                updateRobotPosition();
+                feedback.innerText = "Puzzle reset! Start drawing the 2x2 square.";
+            }
 
-            document.getElementById('run-code-btn').onclick = function() {
-                const requiredCells = new Set(['1,1', '1,2', '2,1', '2,2']);
-                
-                // Check if all required cells are drawn AND only those cells are drawn
-                const correctCount = Array.from(requiredCells).every(key => drawnCells.has(key));
-                const correctTotal = drawnCells.size === 4;
-
-                if (correctCount && correctTotal) {
-                    feedback.innerText = "🎉 PERFECT! You sequenced the movements and created the shape!";
-                    window.lessonSuccess();
-                } else {
-                    feedback.innerText = `❌ INCORRECT SHAPE! Cells filled: ${Array.from(drawnCells).join(', ')}. Target: 1,1; 1,2; 2,1; 2,2.`;
-                    feedback.style.color = '#E74C3C';
-                }
-            };
-
-            // Initial setup
-            updateRobotPosition();
-        });
-    </script>
-</body>
-</html>
+            function checkCompletion() {
+                let all
