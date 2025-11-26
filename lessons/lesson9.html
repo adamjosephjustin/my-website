@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L9: The Missing Step</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="academy-header">
+        <h1>Lesson 9: The Missing Step</h1>
+        <p><a href="../index.html" style="color: var(--color-accent);">← Back to Course Index</a></p>
+    </header>
+
+    <div class="lesson-page-container">
+        <p><strong>Goal:</strong> **Advanced Debugging!** The code won't run because of one small mistake. Click the line of code that has a typo and fix it!</p>
+        
+        <div class="game-area" style="text-align: left;">
+            <p style="font-weight: bold; color: #7F8C8D;">Python Code Block:</p>
+            <div id="code-block" style="background-color: #34495E; color: white; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 1.1rem; line-height: 1.6;">
+                <div class="code-line" data-error="false" id="line1">1. `count = 5`</div>
+                <div class="code-line" data-error="false" id="line2">2. `if count &gt; 3:`</div>
+                <div class="code-line" data-error="true" id="line3">3. <span id="typo-span">`    prin("Too big!")`</span></div> 
+                <div class="code-line" data-error="false" id="line4">4. `else:`</div>
+                <div class="code-line" data-error="false" id="line5">5. `    print("Just right.")`</div>
+            </div>
+            
+            <button id="run-btn" class="game-button" style="margin-top: 20px; background-color: #F1C40F;">Run Code</button>
+            <div class="game-feedback" id="game-feedback">The code will crash! Find and fix the typo by clicking the line and typing the correction.</div>
+        </div>
+        
+        <a href="#" id="next-btn" class="game-button hidden">Next Lesson →</a>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLesson(9); 
+            
+            const runBtn = document.getElementById('run-btn');
+            const typoSpan = document.getElementById('typo-span');
+            const feedback = document.getElementById('game-feedback');
+            
+            let isFixed = false;
+
+            typoSpan.style.cursor = 'pointer';
+            typoSpan.style.textDecoration = 'underline dotted white';
+
+            typoSpan.onclick = function() {
+                if (!isFixed) {
+                    const originalText = typoSpan.innerText;
+                    typoSpan.innerHTML = `<input type="text" value="${originalText}" id="typo-input" style="width: 100%; padding: 5px; border: 1px solid #ccc;">`;
+                    
+                    const input = document.getElementById('typo-input');
+                    input.focus();
+                    
+                    input.onkeypress = function(e) {
+                        if (e.key === 'Enter') {
+                            const fixedCode = input.value.trim().toLowerCase();
+                            if (fixedCode === '3. `    print("too big!")`' || fixedCode === '3. `    print("too big!")`'.replace(/`/g, '')) {
+                                // Successful correction
+                                typoSpan.innerHTML = '3. `    print("Too big!")`';
+                                typoSpan.style.color = '#2ECC71';
+                                typoSpan.style.textDecoration = 'none';
+                                feedback.innerText = "✅ TYPO FIXED! It should be 'print', not 'prin'. Click 'Run Code'!";
+                                isFixed = true;
+                            } else {
+                                feedback.innerText = "❌ Not quite right. It's only missing ONE letter to make 'print'. Try again.";
+                                // Reset the span content if wrong
+                                typoSpan.innerHTML = originalText;
+                            }
+                            typoSpan.onclick = runBtn.onclick; // prevent re-editing
+                        }
+                    };
+                }
+            };
+
+            runBtn.onclick = function() {
+                if (isFixed) {
+                    feedback.innerText = "🎉 CODE RAN SUCCESSFULLY! You found and fixed the bug!";
+                    runBtn.disabled = true;
+                    window.lessonSuccess();
+                } else {
+                    feedback.innerText = "🚨 CRASH! You must fix the typo first before running!";
+                }
+            };
+        });
+    </script>
+</body>
+</html>
