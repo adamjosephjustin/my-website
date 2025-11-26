@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L12: Keyboard Talk</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="academy-header">
+        <h1>Lesson 12: Keyboard Talk</h1>
+        <p><a href="../index.html" style="color: var(--color-accent);">← Back to Course Index</a></p>
+    </header>
+
+    <div class="lesson-page-container">
+        <p><strong>Goal:</strong> Use the **`input()`** command. This lets your code talk to the user and ask for information!</p>
+        
+        <div class="game-area">
+            <h3 style="color: #34495E;">The Code:</h3>
+            <div style="background-color: #34495E; color: white; padding: 10px; border-radius: 5px; font-family: monospace; text-align: left;">
+                `name = input("What is your favorite color? ")`
+            </div>
+            
+            <p style="margin-top: 15px;">**Run the code below and answer the question!**</p>
+            <button id="run-code-btn" class="game-button" style="background-color: #F1C40F;">Run Input Code</button>
+
+            <div id="output-area" style="margin-top: 20px;">
+                </div>
+            
+            <div class="game-feedback" id="game-feedback">Click 'Run Input Code' and type in your answer!</div>
+        </div>
+        
+        <a href="#" id="next-btn" class="game-button hidden">Next Lesson →</a>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLesson(12); 
+            
+            const runBtn = document.getElementById('run-code-btn');
+            const outputArea = document.getElementById('output-area');
+            const feedback = document.getElementById('game-feedback');
+
+            runBtn.onclick = function() {
+                runBtn.disabled = true;
+                feedback.innerText = "The Python code is running...";
+
+                outputArea.innerHTML = `
+                    <p>What is your favorite color? </p>
+                    <input type="text" id="answer-input" placeholder="Type your color here" style="padding: 8px;">
+                    <button id="submit-btn" class="game-button" style="margin-left: 10px;">Enter</button>
+                `;
+                
+                document.getElementById('submit-btn').onclick = function() {
+                    const answer = document.getElementById('answer-input').value.trim();
+                    if (answer.length > 0) {
+                        feedback.innerText = `🎉 CORRECT! The code successfully stored your color (${answer})!`;
+                        window.lessonSuccess();
+                    } else {
+                        feedback.innerText = "❌ Please type something into the box!";
+                        runBtn.disabled = false; // Allow re-run
+                    }
+                };
+            };
+        });
+    </script>
+</body>
+</html>
