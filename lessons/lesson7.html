@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L7: True or False</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="academy-header">
+        <h1>Lesson 7: True or False</h1>
+        <p><a href="../index.html" style="color: var(--color-accent);">← Back to Course Index</a></p>
+    </header>
+
+    <div class="lesson-page-container">
+        <p><strong>Goal:</strong> Computers only understand **True** or **False**. Look at the pictures and decide if the statement is True or False.</p>
+        
+        <div class="game-area">
+            <div style="font-size: 5rem;">🍎 > 🍌</div>
+            <p style="font-size: 1.5rem; margin-top: 10px;">Statement: **Apple count is greater than Banana count.**</p>
+            
+            <div style="display: flex; gap: 40px; margin-top: 20px;">
+                <button class="game-button" id="true-btn" style="background-color: #2ECC71;">TRUE ✅</button>
+                <button class="game-button" id="false-btn" style="background-color: #E74C3C;">FALSE ❌</button>
+            </div>
+            
+            <div class="game-feedback" id="game-feedback"></div>
+        </div>
+        
+        <a href="#" id="next-btn" class="game-button hidden">Next Lesson →</a>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLesson(7); 
+            
+            // Generate random values for Apples and Bananas
+            const appleCount = Math.floor(Math.random() * 5) + 2; // 2 to 6
+            const bananaCount = Math.floor(Math.random() * 5) + 2; // 2 to 6
+            
+            const statement = `${"🍎".repeat(appleCount)} is GREATER THAN ${"🍌".repeat(bananaCount)}`;
+            document.querySelector('.game-area div:first-child').innerHTML = statement;
+            
+            // The actual correct answer
+            const correctAnswer = appleCount > bananaCount;
+
+            const trueBtn = document.getElementById('true-btn');
+            const falseBtn = document.getElementById('false-btn');
+            const feedback = document.getElementById('game-feedback');
+
+            function checkAnswer(userAnswer) {
+                if (userAnswer === correctAnswer) {
+                    feedback.innerText = "🎉 CORRECT! That is Boolean logic!";
+                    trueBtn.disabled = true;
+                    falseBtn.disabled = true;
+                    window.lessonSuccess();
+                } else {
+                    feedback.innerText = "❌ That is incorrect. Look closely at the numbers and try again.";
+                    feedback.style.color = '#E74C3C';
+                }
+            }
+
+            trueBtn.onclick = () => checkAnswer(true);
+            falseBtn.onclick = () => checkAnswer(false);
+        });
+    </script>
+</body>
+</html>
