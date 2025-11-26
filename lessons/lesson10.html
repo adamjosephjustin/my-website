@@ -39,7 +39,7 @@
     </header>
 
     <div class="lesson-page-container">
-        <p><strong>Goal:</strong> Combine **Sequencing** and **Loops**! Draw a small 2x2 blue square on the grid by moving the robot 🤖 and filling cells.</p>
+        <p><strong>Goal:</strong> Use **Nested Logic** (Sequences inside of Loops) to draw a **2x2 blue square**! You must fill cells **(1,1), (1,2), (2,1), and (2,2)**.</p>
         
         <div class="game-area">
             <h3 style="color: var(--color-primary);">The Canvas:</h3>
@@ -57,14 +57,15 @@
                 <div class="grid-cell" data-row="2" data-col="2"></div>
             </div>
             
-            <p><strong>Instructions:</strong> Start at **(0, 0)**. You must fill cells **(1,1), (1,2), (2,1), (2,2)** to make a square!</p>
+            <p><strong>Instructions:</strong> The robot 🤖 starts at **(1,1)**. The required sequence is: **Fill, Move Right, Fill, Move Down, Move Left, Fill, Move Right, Fill.**</p>
             
             <button id="fill-cell-btn" class="game-button">Fill Cell 🎨</button>
             <button id="move-right-btn" class="game-button">Move Right →</button>
             <button id="move-down-btn" class="game-button">Move Down ↓</button>
+            <button id="move-left-btn" class="game-button">Move Left ←</button>
             <button id="reset-btn" class="game-button" style="background-color: #E74C3C;">Reset</button>
 
-            <div class="game-feedback" id="game-feedback">Current Position: (0,0). Click commands to draw.</div>
+            <div class="game-feedback" id="game-feedback">Current Position: (1,1). Follow the instruction sequence above!</div>
         </div>
         
         <a href="#" id="next-btn" class="game-button hidden">Next Lesson →</a>
@@ -78,7 +79,8 @@
             const feedback = document.getElementById('game-feedback');
             const gridCells = document.querySelectorAll('.grid-cell');
             
-            let robotPosition = { row: 0, col: 0 };
+            // Start position is now (1, 1), the first cell of the 2x2 square
+            let robotPosition = { row: 1, col: 1 };
             const drawnCells = new Set();
             const targetCells = new Set(['1,1', '1,2', '2,1', '2,2']);
 
@@ -102,29 +104,5 @@
                     currentCell.classList.add('filled');
                     drawnCells.add(key);
                     feedback.innerText = `Filled cell (${key})!`;
-                } else if (currentCell) {
-                    feedback.innerText = `⚠️ You filled cell (${key})! Only fill cells within the target 2x2 square.`;
-                }
-                updateRobotPosition();
-            }
-
-            function move(dr, dc) {
-                const newRow = Math.max(0, Math.min(2, robotPosition.row + dr));
-                const newCol = Math.max(0, Math.min(2, robotPosition.col + dc));
-                robotPosition = { row: newRow, col: newCol };
-                updateRobotPosition();
-            }
-            
-            function resetPuzzle() {
-                robotPosition = { row: 0, col: 0 };
-                drawnCells.clear();
-                gridCells.forEach(cell => cell.classList.remove('filled'));
-                document.getElementById('fill-cell-btn').disabled = false;
-                document.getElementById('move-right-btn').disabled = false;
-                document.getElementById('move-down-btn').disabled = false;
-                updateRobotPosition();
-                feedback.innerText = "Puzzle reset! Start drawing the 2x2 square.";
-            }
-
-            function checkCompletion() {
-                let all
+                } else if (currentCell && !targetCells.has(key)) {
+                    feedback.innerText = `⚠️ Mistake! You filled cell (${key}). Only fill the
