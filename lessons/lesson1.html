@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L1: The Robot's Path</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="academy-header">
+        <h1>Lesson 1: The Robot's Path</h1>
+        <p><a href="../index.html" style="color: var(--color-accent);">← Back to Course Index</a></p>
+    </header>
+
+    <div class="lesson-page-container">
+        <p><strong>Goal:</strong> Help the robot 🤖 get the star ⭐ by telling it the steps in the correct **sequence**!</p>
+        
+        <div class="game-area">
+            <div class="robot-path">
+                <div class="robot-path-grid">
+                    <div class="path-tile start">🤖 START</div>
+                    <div class="path-tile" id="tile1"></div>
+                    <div class="path-tile"></div>
+                    
+                    <div class="path-tile"></div>
+                    <div class="path-tile" id="tile2"></div>
+                    <div class="path-tile"></div>
+
+                    <div class="path-tile"></div>
+                    <div class="path-tile" id="tile3"></div>
+                    <div class="path-tile end">⭐ END</div>
+                </div>
+            </div>
+            
+            <p><strong>Instructions:</strong> Click the buttons in the correct order to form the path (Tile 1, Tile 2, Tile 3).</p>
+            <div id="command-buttons">
+                <button class="game-button" data-step="1">Step 1</button>
+                <button class="game-button" data-step="2">Step 2</button>
+                <button class="game-button" data-step="3">Step 3</button>
+            </div>
+
+            <div class="game-feedback" id="game-feedback">Click the first step to begin!</div>
+        </div>
+        
+        <a href="#" id="next-btn" class="game-button hidden">Next Lesson →</a>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLesson(1); // Calls the generic lesson setup from script.js
+
+            let currentStep = 1;
+            const feedback = document.getElementById('game-feedback');
+            const buttons = document.querySelectorAll('#command-buttons .game-button');
+            const tiles = [document.getElementById('tile1'), document.getElementById('tile2'), document.getElementById('tile3')];
+
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const stepClicked = parseInt(this.getAttribute('data-step'));
+
+                    if (stepClicked === currentStep) {
+                        // Correct step in the sequence
+                        tiles[currentStep - 1].classList.add('path');
+                        this.disabled = true;
+                        currentStep++;
+                        feedback.innerText = `Great! Now click Step ${currentStep}.`;
+
+                        if (currentStep > 3) {
+                            feedback.innerText = "🤖 SUCCESS! Path complete!";
+                            window.lessonSuccess(); // Triggers successful completion
+                        }
+                    } else {
+                        // Incorrect step
+                        feedback.innerText = "🚨 Oops! That's the wrong step. Start again!";
+                        currentStep = 1;
+                        buttons.forEach(btn => btn.disabled = false);
+                        tiles.forEach(tile => tile.classList.remove('path'));
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
