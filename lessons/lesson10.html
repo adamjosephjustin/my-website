@@ -6,6 +6,7 @@
     <title>L10: Building a Shape</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
+        /* Specific CSS for the grid layout */
         .drawing-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -29,6 +30,9 @@
         .grid-cell.filled { 
             background-color: var(--color-primary); 
             transition: background-color 0.3s;
+        }
+        .game-area .game-button {
+            margin: 5px;
         }
     </style>
 </head>
@@ -57,7 +61,7 @@
                 <div class="grid-cell" data-row="2" data-col="2"></div>
             </div>
             
-            <p><strong>Instructions:</strong> The robot 🤖 starts at **(1,1)**. The required sequence is: **Fill, Move Right, Fill, Move Down, Move Left, Fill, Move Right, Fill.**</p>
+            <p><strong>Instructions:</strong> The robot 🤖 starts at **(1,1)**. Follow the pattern: **(Fill, Move Right, Fill, Move Down, Move Left, Fill, Move Right, Fill)**</p>
             
             <button id="fill-cell-btn" class="game-button">Fill Cell 🎨</button>
             <button id="move-right-btn" class="game-button">Move Right →</button>
@@ -79,18 +83,28 @@
             const feedback = document.getElementById('game-feedback');
             const gridCells = document.querySelectorAll('.grid-cell');
             
-            // Start position is now (1, 1), the first cell of the 2x2 square
+            // Start position is (1, 1), the first cell of the 2x2 square
             let robotPosition = { row: 1, col: 1 };
             const drawnCells = new Set();
+            // The four cells that must be filled
             const targetCells = new Set(['1,1', '1,2', '2,1', '2,2']);
+            
+            const fillBtn = document.getElementById('fill-cell-btn');
+            const moveRightBtn = document.getElementById('move-right-btn');
+            const moveDownBtn = document.getElementById('move-down-btn');
+            const moveLeftBtn = document.getElementById('move-left-btn');
+
 
             function updateRobotPosition() {
+                // Clear robot emoji from all cells
                 gridCells.forEach(cell => cell.innerHTML = '');
+                
                 const key = `${robotPosition.row},${robotPosition.col}`;
-                const currentCell = document.querySelector(`[data-row="${robotPosition.row}"][data-col="${robotPosition.col}"]`);
+                // Select the current cell using data attributes
+                const currentCell = document.querySelector(`.grid-cell[data-row="${robotPosition.row}"][data-col="${robotPosition.col}"]`);
                 
                 if (currentCell) {
-                    currentCell.innerHTML = '🤖';
+                    currentCell.innerHTML = '🤖'; // Place robot emoji
                 }
                 feedback.innerText = `Current Position: (${key}).`;
                 checkCompletion();
@@ -98,11 +112,86 @@
 
             function fillCell() {
                 const key = `${robotPosition.row},${robotPosition.col}`;
-                const currentCell = document.querySelector(`[data-row="${robotPosition.row}"][data-col="${robotPosition.col}"]`);
+                const currentCell = document.querySelector(`.grid-cell[data-row="${robotPosition.row}"][data-col="${robotPosition.col}"]`);
                 
-                if (currentCell && targetCells.has(key)) {
-                    currentCell.classList.add('filled');
-                    drawnCells.add(key);
-                    feedback.innerText = `Filled cell (${key})!`;
-                } else if (currentCell && !targetCells.has(key)) {
-                    feedback.innerText = `⚠️ Mistake! You filled cell (${key}). Only fill the
+                if (!currentCell) return; // Should not happen
+
+                if (targetCells.has(key)) {
+                    // Check if it's a target cell
+                    if (!drawnCells.has(key)) {
+                        // Only fill if it hasn't been filled already
+                        currentCell.classList.add('filled');
+                        drawnCells.add(key);
+                        feedback.innerText = `Filled cell (${key})!`;
+                    } else {
+                        feedback.innerText = `Cell (${key}) is already filled! Move to a new spot.`;
+                    }
+                } else {
+                    // If the cell is outside the target 2x2 area
+                    feedback.innerText = `⚠️ Mistake! You filled cell (${key}). This is outside the target 2x2 square. Starting over!`;
+                    resetPuzzle(); // Force reset on error
+                    return;
+                }
+                updateRobotPosition();
+            }
+
+            function move(dr, dc) {
+                // Calculate new position
+                const newRow = robotPosition.row + dr;
+                const newCol = robotPosition.col + dc;
+                
+                // Bounds check: Must stay within the 2x2 drawing area (rows 1-2, columns 1-2)
+                if (newRow >= 1 && newRow <= 2 && newCol >= 1 && newCol <= 2) {
+                    robotPosition = { row: newRow, col: newCol };
+                } else {
+                    feedback.innerText = "⚠️ Oops! You tried to move outside the 2x2 drawing area. Try again!";
+                    resetPuzzle(); // Force reset on error
+                    return;
+                }
+                updateRobotPosition();
+            }
+            
+            function resetPuzzle() {
+                robotPosition = { row: 1, col: 1 }; // Reset to (1,1)
+                drawnCells.clear();
+                gridCells.forEach(cell => cell.classList.remove('filled'));
+                // Re-enable buttons
+                fillBtn.disabled = false;
+                moveRightBtn.disabled = false;
+                moveDownBtn.disabled = false;
+                moveLeftBtn.disabled = false;
+                updateRobotPosition();
+                feedback.innerText = "Puzzle reset! Start drawing the 2x2 square from (1,1).";
+            }
+
+            function checkCompletion() {
+                // The puzzle is complete if:
+                // 1. All four target cells are in the drawnCells set.
+                // 2. ONLY four cells have been drawn (to prevent drawing extras outside the target).
+                const allRequiredFilled = Array.from(targetCells).every(key => drawnCells.has(key));
+                const correctTotal = drawnCells.size === 4;
+
+                if (allRequiredFilled && correctTotal) {
+                    feedback.innerText = "🎉 PERFECT! You combined logic to build the shape and completed the Intermediate track!";
+                    // Disable all interaction buttons
+                    fillBtn.disabled = true;
+                    moveRightBtn.disabled = true;
+                    moveDownBtn.disabled = true;
+                    moveLeftBtn.disabled = true;
+                    window.lessonSuccess(); // Mark lesson as complete
+                }
+            }
+            
+            // Attach event listeners to buttons
+            fillBtn.onclick = fillCell;
+            moveRightBtn.onclick = () => move(0, 1);
+            moveDownBtn.onclick = () => move(1, 0);
+            moveLeftBtn.onclick = () => move(0, -1);
+            document.getElementById('reset-btn').onclick = resetPuzzle;
+
+            // Initial setup
+            updateRobotPosition();
+        });
+    </script>
+</body>
+</html>
