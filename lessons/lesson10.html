@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L10: Building a Shape</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .drawing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            width: 180px;
+            height: 180px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+        }
+        .grid-cell {
+            width: 60px;
+            height: 60px;
+            background: #fff;
+            border: 1px solid #eee;
+            box-sizing: border-box;
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+        .grid-cell.filled { background-color: var(--color-primary); }
+    </style>
+</head>
+<body>
+    <header class="academy-header">
+        <h1>Lesson 10: Building a Shape</h1>
+        <p><a href="../index.html" style="color: var(--color-accent);">← Back to Course Index</a></p>
+    </header>
+
+    <div class="lesson-page-container">
+        <p><strong>Goal:</strong> Combine **Sequencing** and **Loops**! Draw a small blue square (4 sides) on the grid.</p>
+        
+        <div class="game-area">
+            <h3 style="color: var(--color-primary);">The Canvas:</h3>
+            <div class="drawing-grid" id="drawing-grid">
+                <div class="grid-cell" data-row="0" data-col="0"></div>
+                <div class="grid-cell" data-row="0" data-col="1"></div>
+                <div class="grid-cell" data-row="0" data-col="2"></div>
+
+                <div class="grid-cell" data-row="1" data-col="0"></div>
+                <div class="grid-cell" data-row="1" data-col="1"></div>
+                <div class="grid-cell" data-row="1" data-col="2"></div>
+
+                <div class="grid-cell" data-row="2" data-col="0"></div>
+                <div class="grid-cell" data-row="2" data-col="1"></div>
+                <div class="grid-cell" data-row="2" data-col="2"></div>
+            </div>
+            
+            <p><strong>Instructions:</strong> Use the commands to fill the **4** center cells to make a 2x2 square. (Cells 1,1; 1,2; 2,1; 2,2)</p>
+            
+            <button id="fill-cell-btn" class="game-button">Fill Cell 🎨</button>
+            <button id="move-right-btn" class="game-button">Move Right →</button>
+            <button id="move-down-btn" class="game-button">Move Down ↓</button>
+            <button id="run-code-btn" class="game-button" style="background-color: #2C3E50;">Check Drawing</button>
+
+            <div class="game-feedback" id="game-feedback">Start at cell 0,0 (top-left). Build a 2x2 square!</div>
+        </div>
+        
+        <a href="#" id="next-btn" class="game-button hidden">Next Lesson →</a>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLesson(10); 
+            
+            const gridCells = document.querySelectorAll('.grid-cell');
+            const feedback = document.getElementById('game-feedback');
+            
+            let robotPosition = { row: 0, col: 0 };
+            const drawnCells = new Set(); // Stores 'row,col' strings
+
+            function updateRobotPosition() {
+                gridCells.forEach(cell => cell.style.border = '1px solid #eee');
+                const currentCell = document.querySelector(`[data-row="${robotPosition.row}"][data-col="${robotPosition.col}"]`);
+                if (currentCell) {
+                    currentCell.style.border = '3px dashed red'; // Highlight robot's location
+                }
+            }
+
+            function fillCell() {
+                const key = `${robotPosition.row},${robotPosition.col}`;
+                const currentCell = document.querySelector(`[data-row="${robotPosition.row}"][data-col="${robotPosition.col}"]`);
+                if (currentCell && !drawnCells.has(key)) {
+                    currentCell.classList.add('filled');
+                    drawnCells.add(key);
+                    feedback.innerText = `Cell ${key} filled!`;
+                }
+            }
+
+            function move(dr, dc) {
+                const newRow = Math.max(0, Math.min(2, robotPosition.row + dr));
+                const newCol = Math.max(0, Math.min(2, robotPosition.col + dc));
+                
+                if (newRow !== robotPosition.row || newCol !== robotPosition.col) {
+                    robotPosition = { row: newRow, col: newCol };
+                    updateRobotPosition();
+                    feedback.innerText = `Moved to ${newRow},${newCol}.`;
+                }
+            }
+            
+            document.getElementById('fill-cell-btn').onclick = fillCell;
+            document.getElementById('move-right-btn').onclick = () => move(0, 1);
+            document.getElementById('move-down-btn').onclick = () => move(1, 0);
+
+            document.getElementById('run-code-btn').onclick = function() {
+                const requiredCells = new Set(['1,1', '1,2', '2,1', '2,2']);
+                
+                // Check if all required cells are drawn AND only those cells are drawn
+                const correctCount = Array.from(requiredCells).every(key => drawnCells.has(key));
+                const correctTotal = drawnCells.size === 4;
+
+                if (correctCount && correctTotal) {
+                    feedback.innerText = "🎉 PERFECT! You sequenced the movements and created the shape!";
+                    window.lessonSuccess();
+                } else {
+                    feedback.innerText = `❌ INCORRECT SHAPE! Cells filled: ${Array.from(drawnCells).join(', ')}. Target: 1,1; 1,2; 2,1; 2,2.`;
+                    feedback.style.color = '#E74C3C';
+                }
+            };
+
+            // Initial setup
+            updateRobotPosition();
+        });
+    </script>
+</body>
+</html>
