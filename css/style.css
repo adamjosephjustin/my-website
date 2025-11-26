@@ -1,0 +1,265 @@
+/* Import Google Fonts for a kid-friendly, academic look */
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Open+Sans:wght@400;700&display=swap');
+
+:root {
+    --color-main: #2C3E50; /* Dark Blue/Professional */
+    --color-primary: #3498DB; /* Bright Blue/Kids */
+    --color-secondary: #2ECC71; /* Green/Success */
+    --color-accent: #F1C40F; /* Yellow/Fun */
+    --color-bg: #ECF0F1; /* Light Gray */
+
+    /* Certificate Colors */
+    --cert-beginner: #FFD700; /* Gold */
+    --cert-intermediate: #C0C0C0; /* Silver */
+    --cert-pro: #CD7F32; /* Bronze */
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: var(--color-bg);
+    color: var(--color-main);
+    margin: 0;
+    padding: 0;
+}
+
+/* --- Header & Title --- */
+.academy-header {
+    background-color: var(--color-main);
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border-bottom: 5px solid var(--color-primary);
+}
+
+.academy-header h1 {
+    font-family: 'Bangers', cursive;
+    font-size: 3.5rem;
+    margin: 0;
+    color: var(--color-accent);
+    letter-spacing: 2px;
+}
+
+.academy-header h2 {
+    font-size: 1.5rem;
+    margin-top: 5px;
+    font-weight: 400;
+}
+
+/* --- Course Index Layout --- */
+.course-index {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.certificate-track {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-left: 10px solid var(--color-primary);
+}
+
+.track-title {
+    font-family: 'Bangers', cursive;
+    font-size: 2rem;
+    margin-top: 0;
+    border-bottom: 2px dashed #eee;
+    padding-bottom: 10px;
+}
+
+.beginner-color { color: var(--cert-beginner); }
+.intermediate-color { color: var(--cert-intermediate); }
+.pro-color { color: var(--cert-pro); }
+
+.lesson-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.lesson-card {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    flex-grow: 1;
+    min-width: 150px;
+    text-align: center;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.lesson-card:hover:not(.locked) {
+    background-color: #3f51b5;
+    transform: translateY(-3px);
+}
+
+.lesson-card.locked {
+    background-color: #BDC3C7; /* Grayed out */
+    cursor: not-allowed;
+    position: relative;
+}
+
+.lesson-card.locked::after {
+    content: '🔒';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    opacity: 0.8;
+}
+
+.track-status {
+    font-weight: 700;
+    color: var(--color-main);
+}
+
+.cert-btn {
+    background-color: var(--color-secondary);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin-top: 15px;
+}
+
+/* --- Certificate Modal --- */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.certificate-box {
+    background: white;
+    width: 90%;
+    max-width: 700px;
+    min-height: 450px;
+    padding: 40px;
+    border: 15px double var(--color-accent);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    border-radius: 10px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.cert-header {
+    font-family: 'Bangers', cursive;
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: var(--color-primary);
+}
+
+.cert-level {
+    font-size: 2.5rem;
+    margin: 10px 0;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.cert-name {
+    font-family: cursive;
+    font-size: 3.5rem;
+    color: var(--color-main);
+    border-bottom: 4px solid var(--color-main);
+    display: inline-block;
+    padding: 0 30px;
+    margin: 10px 0 20px 0;
+}
+
+.cert-footer {
+    margin-top: 30px;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.hidden { display: none !important; }
+
+/* Lesson Page Styling (Included for consistency) */
+.lesson-page-container {
+    max-width: 800px;
+    margin: 30px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.lesson-title {
+    color: var(--color-primary);
+    font-family: 'Bangers', cursive;
+    font-size: 2.5rem;
+}
+
+.game-area {
+    min-height: 250px;
+    border: 3px dashed var(--color-accent);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.game-feedback {
+    min-height: 20px;
+    font-weight: bold;
+    color: red;
+}
+
+.game-button {
+    background-color: var(--color-secondary);
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+}
+.game-button:hover { background-color: #27AE60; }
+.game-button:active { transform: translateY(2px); }
+
+/* Puzzle specific styles */
+.robot-path {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.robot-path-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    margin: 15px 0;
+}
+.path-tile {
+    width: 60px;
+    height: 60px;
+    background: #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.path-tile.start { background: #A9DFBF; }
+.path-tile.end { background: #E74C3C; }
+.path-tile.path { background: var(--color-accent); }
