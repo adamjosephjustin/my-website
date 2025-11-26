@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L5: The Big Blueprint</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="academy-header">
+        <h1>Lesson 5: The Big Blueprint</h1>
+        <p><a href="../index.html" style="color: var(--color-accent);">← Back to Course Index</a></p>
+    </header>
+
+    <div class="lesson-page-container">
+        <p><strong>Goal:</strong> A **Function** is like a blueprint 📄. One button runs many steps! Click 'Build House' to execute the function: Dig, Lay Foundation, Build Walls, Add Roof.</p>
+        
+        <div class="game-area">
+            <div id="build-display" style="font-size: 4rem;">🏡</div>
+            <p style="font-size: 1.2rem; margin: 15px 0;">Current Step: <span id="current-step">Waiting for command...</span></p>
+            
+            <button id="build-btn" class="game-button" style="background-color: #F1C40F;">Execute Build House Function</button>
+            
+            <div class="game-feedback" id="game-feedback">Click the button to run the blueprint!</div>
+        </div>
+        
+        <a href="#" id="next-btn" class="game-button hidden">Next Lesson →</a>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLesson(5); 
+            
+            const buildBtn = document.getElementById('build-btn');
+            const display = document.getElementById('build-display');
+            const stepDisplay = document.getElementById('current-step');
+            const feedback = document.getElementById('game-feedback');
+
+            const steps = [
+                { text: "Digging the land...", emoji: "⛏️" },
+                { text: "Laying the foundation...", emoji: "🧱" },
+                { text: "Building the walls...", emoji: "🏗️" },
+                { text: "Adding the roof!", emoji: "🏠" }
+            ];
+
+            function runBuildFunction() {
+                buildBtn.disabled = true;
+                feedback.innerText = "Function Running...";
+                let stepIndex = 0;
+                
+                const interval = setInterval(() => {
+                    if (stepIndex < steps.length) {
+                        const step = steps[stepIndex];
+                        display.innerText = step.emoji;
+                        stepDisplay.innerText = step.text;
+                        stepIndex++;
+                    } else {
+                        clearInterval(interval);
+                        feedback.innerText = "🎉 Function Complete! The house is built!";
+                        display.innerText = "✅🏠";
+                        window.lessonSuccess();
+                    }
+                }, 1000); // Wait 1 second between steps
+            }
+
+            buildBtn.onclick = runBuildFunction;
+        });
+    </script>
+</body>
+</html>
