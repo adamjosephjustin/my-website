@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L3: Fixing the Wire</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="academy-header">
+        <h1>Lesson 3: Fixing the Wire</h1>
+        <p><a href="../index.html" style="color: var(--color-accent);">← Back to Course Index</a></p>
+    </header>
+
+    <div class="lesson-page-container">
+        <p><strong>Goal:</strong> Practice **Debugging**! The computer 💻 is broken because the wires are out of order. Find the error and fix it!</p>
+        
+        <div class="game-area">
+            <h3 style="color: #E74C3C;">The Problem:</h3>
+            <p>The code must run 1, 2, 3, but the wires are mixed up!</p>
+            
+            <div id="wire-puzzle" style="display: flex; gap: 20px; align-items: center; margin: 20px 0;">
+                <div class="wire-bundle" data-order="2" data-correct="1">
+                    <div style="font-size: 2rem; color: #5B2C6F;">Wire 2</div>
+                    <div style="color: #8E44AD; font-size: 3rem;">🔌</div>
+                </div>
+                <div class="wire-bundle" data-order="1" data-correct="2">
+                    <div style="font-size: 2rem; color: #5B2C6F;">Wire 1</div>
+                    <div style="color: #8E44AD; font-size: 3rem;">🔌</div>
+                </div>
+                <div class="wire-bundle" data-order="3" data-correct="3">
+                    <div style="font-size: 2rem; color: #5B2C6F;">Wire 3</div>
+                    <div style="color: #8E44AD; font-size: 3rem;">🔌</div>
+                </div>
+            </div>
+
+            <button id="check-btn" class="game-button" style="background-color: #E74C3C;">Check Wires</button>
+            
+            <div class="game-feedback" id="game-feedback">Click 'Wire 2' and 'Wire 1' to swap them and fix the sequence (1, 2, 3)!</div>
+        </div>
+        
+        <a href="#" id="next-btn" class="game-button hidden">Next Lesson →</a>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLesson(3); 
+            
+            const wiresContainer = document.getElementById('wire-puzzle');
+            const wires = Array.from(wiresContainer.querySelectorAll('.wire-bundle'));
+            const checkBtn = document.getElementById('check-btn');
+            const feedback = document.getElementById('game-feedback');
+            let selectedWire = null;
+
+            // Initial visual setup (Wire 2, Wire 1, Wire 3)
+            // Note: HTML already defines the initial wrong order.
+
+            function swapWires(wire1, wire2) {
+                const tempOrder = wire1.getAttribute('data-order');
+                wire1.setAttribute('data-order', wire2.getAttribute('data-order'));
+                wire2.setAttribute('data-order', tempOrder);
+                
+                // Swap DOM positions
+                const parent = wire1.parentNode;
+                const nextWire2 = wire2.nextElementSibling === wire1 ? wire2 : wire2.nextElementSibling;
+                parent.insertBefore(wire2, wire1);
+                parent.insertBefore(wire1, nextWire2);
+            }
+
+            wires.forEach(wire => {
+                wire.style.cursor = 'pointer';
+                wire.style.transition = 'border 0.2s';
+
+                wire.onclick = function() {
+                    if (selectedWire === this) {
+                        // Deselect
+                        this.style.border = 'none';
+                        selectedWire = null;
+                        feedback.innerText = "Wire deselected.";
+                    } else if (selectedWire) {
+                        // Swap with the previously selected wire
+                        swapWires(selectedWire, this);
+                        selectedWire.style.border = 'none';
+                        this.style.border = 'none';
+                        selectedWire = null;
+                        feedback.innerText = "Wires swapped! Click 'Check Wires'!";
+                    } else {
+                        // Select first wire
+                        selectedWire = this;
+                        this.style.border = '4px solid ' + var_color_accent; // Use the CSS variable color for highlight
+                        feedback.innerText = "First wire selected. Click another to swap.";
+                    }
+                };
+            });
+
+            checkBtn.onclick = function() {
+                const currentOrder = Array.from(wiresContainer.querySelectorAll('.wire-bundle')).map(w => w.getAttribute('data-order'));
+                const correctOrder = ['1', '2', '3'];
+
+                if (JSON.stringify(currentOrder) === JSON.stringify(correctOrder)) {
+                    feedback.innerText = "🎉 Debugged! The wires are 1, 2, 3. The circuit is running!";
+                    checkBtn.disabled = true;
+                    wires.forEach(w => w.onclick = null);
+                    window.lessonSuccess();
+                } else {
+                    feedback.innerText = `❌ Error! Current order is ${currentOrder.join(', ')}. Keep swapping!`;
+                    feedback.style.color = '#E74C3C';
+                }
+            };
+        });
+    </script>
+</body>
+</html>
