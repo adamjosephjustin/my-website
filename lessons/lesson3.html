@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>L3: Fixing the Wire</title>
     <link rel="stylesheet" href="../css/style.css">
+    <style>
+        /* Add specific styling for the wires */
+        .wire-bundle {
+            background-color: #E6E6FA; /* Lavender background */
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            flex-basis: 120px; /* fixed size for better layout */
+        }
+        .wire-bundle[data-order="1"] { border: 3px solid #FFD700; } /* Gold border for correct wire */
+        .wire-bundle[data-order="2"] { border: 3px solid #C0C0C0; } /* Silver border */
+        .wire-bundle[data-order="3"] { border: 3px solid #CD7F32; } /* Bronze border */
+    </style>
 </head>
 <body>
     <header class="academy-header">
@@ -19,16 +32,16 @@
             <h3 style="color: #E74C3C;">The Problem:</h3>
             <p>The code must run 1, 2, 3, but the wires are mixed up!</p>
             
-            <div id="wire-puzzle" style="display: flex; gap: 20px; align-items: center; margin: 20px 0;">
-                <div class="wire-bundle" data-order="2" data-correct="1">
+            <div id="wire-puzzle" style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
+                <div class="wire-bundle" data-step="1" data-order="2">
                     <div style="font-size: 2rem; color: #5B2C6F;">Wire 2</div>
                     <div style="color: #8E44AD; font-size: 3rem;">🔌</div>
                 </div>
-                <div class="wire-bundle" data-order="1" data-correct="2">
+                <div class="wire-bundle" data-step="2" data-order="1">
                     <div style="font-size: 2rem; color: #5B2C6F;">Wire 1</div>
                     <div style="color: #8E44AD; font-size: 3rem;">🔌</div>
                 </div>
-                <div class="wire-bundle" data-order="3" data-correct="3">
+                <div class="wire-bundle" data-step="3" data-order="3">
                     <div style="font-size: 2rem; color: #5B2C6F;">Wire 3</div>
                     <div style="color: #8E44AD; font-size: 3rem;">🔌</div>
                 </div>
@@ -53,19 +66,26 @@
             const feedback = document.getElementById('game-feedback');
             let selectedWire = null;
 
-            // Initial visual setup (Wire 2, Wire 1, Wire 3)
-            // Note: HTML already defines the initial wrong order.
-
+            // --- Corrected Swap Logic ---
             function swapWires(wire1, wire2) {
-                const tempOrder = wire1.getAttribute('data-order');
-                wire1.setAttribute('data-order', wire2.getAttribute('data-order'));
-                wire2.setAttribute('data-order', tempOrder);
+                // 1. Swap the visual elements in the DOM
+                const parent = wiresContainer;
                 
-                // Swap DOM positions
-                const parent = wire1.parentNode;
-                const nextWire2 = wire2.nextElementSibling === wire1 ? wire2 : wire2.nextElementSibling;
-                parent.insertBefore(wire2, wire1);
-                parent.insertBefore(wire1, nextWire2);
+                // Get the elements right after wire1 and wire2 to determine insertion points
+                const nextWire1 = wire1.nextElementSibling;
+                const nextWire2 = wire2.nextElementSibling;
+
+                if (nextWire1 === wire2) {
+                    // Case: wire1 and wire2 are adjacent
+                    parent.insertBefore(wire2, wire1);
+                } else if (nextWire2 === wire1) {
+                    // Case: wire2 and wire1 are adjacent
+                    parent.insertBefore(wire1, wire2);
+                } else {
+                    // Case: wires are separated
+                    parent.insertBefore(wire2, nextWire1);
+                    parent.insertBefore(wire1, nextWire2);
+                }
             }
 
             wires.forEach(wire => {
@@ -75,33 +95,39 @@
                 wire.onclick = function() {
                     if (selectedWire === this) {
                         // Deselect
-                        this.style.border = 'none';
+                        this.style.outline = 'none';
                         selectedWire = null;
                         feedback.innerText = "Wire deselected.";
                     } else if (selectedWire) {
                         // Swap with the previously selected wire
                         swapWires(selectedWire, this);
-                        selectedWire.style.border = 'none';
-                        this.style.border = 'none';
+                        
+                        selectedWire.style.outline = 'none';
+                        this.style.outline = 'none';
                         selectedWire = null;
                         feedback.innerText = "Wires swapped! Click 'Check Wires'!";
+                        
+                        // Re-fetch the list in new order for the check button
+                        wires.length = 0; // Clear the array reference
+                        wires.push(...Array.from(wiresContainer.querySelectorAll('.wire-bundle')));
                     } else {
                         // Select first wire
                         selectedWire = this;
-                        this.style.border = '4px solid ' + var_color_accent; // Use the CSS variable color for highlight
+                        this.style.outline = '4px solid var(--color-accent)'; 
                         feedback.innerText = "First wire selected. Click another to swap.";
                     }
                 };
             });
 
             checkBtn.onclick = function() {
-                const currentOrder = Array.from(wiresContainer.querySelectorAll('.wire-bundle')).map(w => w.getAttribute('data-order'));
+                // Get the current order based on their DOM position
+                const currentOrder = Array.from(wiresContainer.children).map(w => w.querySelector('div:first-child').innerText.replace('Wire ', ''));
                 const correctOrder = ['1', '2', '3'];
 
                 if (JSON.stringify(currentOrder) === JSON.stringify(correctOrder)) {
                     feedback.innerText = "🎉 Debugged! The wires are 1, 2, 3. The circuit is running!";
                     checkBtn.disabled = true;
-                    wires.forEach(w => w.onclick = null);
+                    Array.from(wiresContainer.children).forEach(w => w.onclick = null); // Disable all clicks
                     window.lessonSuccess();
                 } else {
                     feedback.innerText = `❌ Error! Current order is ${currentOrder.join(', ')}. Keep swapping!`;
