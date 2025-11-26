@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L6: The Counting Game</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="academy-header">
+        <h1>Lesson 6: The Counting Game</h1>
+        <p><a href="../index.html" style="color: var(--color-accent);">← Back to Course Index</a></p>
+    </header>
+
+    <div class="lesson-page-container">
+        <p><strong>Goal:</strong> A **Variable** is a box that holds a value (like a number). We are using a variable to count the stars! Click 'Add Star' 3 times, then click 'Check Value'.</p>
+        
+        <div class="game-area">
+            <div style="font-size: 4rem;">Box Value: <span id="variable-box" style="color: var(--color-primary); font-weight: bold;">0</span></div>
+            <div id="star-display" style="font-size: 2rem;"></div>
+            
+            <button id="add-btn" class="game-button">Add Star ⭐</button>
+            <button id="check-btn" class="game-button" style="background-color: #2C3E50;">Check Value</button>
+            
+            <div class="game-feedback" id="game-feedback">Add three stars to the box.</div>
+        </div>
+        
+        <a href="#" id="next-btn" class="game-button hidden">Next Lesson →</a>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLesson(6); 
+            
+            let starCount = 0; // This is our variable!
+            const boxDisplay = document.getElementById('variable-box');
+            const starDisplay = document.getElementById('star-display');
+            const addBtn = document.getElementById('add-btn');
+            const checkBtn = document.getElementById('check-btn');
+            const feedback = document.getElementById('game-feedback');
+
+            addBtn.onclick = function() {
+                if (starCount < 3) {
+                    starCount++; 
+                    boxDisplay.innerText = starCount;
+                    starDisplay.innerText += "⭐";
+                    feedback.innerText = `Star added! Value is now ${starCount}.`;
+                    if (starCount === 3) {
+                        addBtn.disabled = true;
+                        feedback.innerText = "Box is full! Click 'Check Value' to test your variable.";
+                    }
+                }
+            };
+
+            checkBtn.onclick = function() {
+                if (starCount === 3) {
+                    feedback.innerText = "🎉 CORRECT! The variable remembered the value 3!";
+                    checkBtn.disabled = true;
+                    window.lessonSuccess();
+                } else {
+                    feedback.innerText = "❌ Incorrect value. Make sure the value is 3!";
+                }
+            };
+        });
+    </script>
+</body>
+</html>
