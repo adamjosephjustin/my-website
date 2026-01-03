@@ -26,6 +26,17 @@ window.onload = () => {
     initFirebase();
     if (state.name) document.getElementById('input-name').value = state.name;
     setupCanvas();
+
+    // Check for rejoin
+    const lastRoom = localStorage.getItem('pictionary_last_room');
+    if (lastRoom && state.name) {
+        const rejoin = confirm(`Hey ${state.name}! You were in room ${lastRoom}. Want to rejoin?`);
+        if (rejoin) {
+            state.room = lastRoom;
+            document.getElementById('input-room-code').value = lastRoom;
+            joinGame();
+        }
+    }
 };
 
 // ==========================================
@@ -106,8 +117,27 @@ function joinGame() {
 
 function enterGameRoom() {
     document.getElementById('room-badge').innerText = `Room: ${state.room}`;
+    localStorage.setItem('pictionary_last_room', state.room); // Save for rejoin
     switchView('game');
     listenToRoom();
+}
+
+function exitRoom() {
+    if (!confirm('Leave this room?')) return;
+
+    // Remove from Firebase
+    if (state.room && state.id) {
+        database.ref(`rooms/${state.room}/players/${state.id}`).remove();
+    }
+
+    // Clear local state
+    localStorage.removeItem('pictionary_last_room');
+    state.room = '';
+    state.isHost = false;
+    state.isDrawer = false;
+
+    // Return to mode select
+    switchView('mode');
 }
 
 // ==========================================
@@ -308,10 +338,10 @@ function addChatBubble(name, text, type) {
     box.scrollTop = box.scrollHeight;
 }
 
-function setColor(c) {
+function setColor(c, element) {
     color = c;
     document.querySelectorAll('.color-dot').forEach(el => el.classList.remove('active'));
-    // Visual active state update logic needed if passing 'this', but keeping simple.
+    if (element) element.classList.add('active');
 }
 
 window.clearBoard = () => database.ref(`rooms/${state.room}/action`).set('CLEAR');
@@ -325,3 +355,4 @@ window.createGame = createGame;
 window.joinGame = joinGame;
 window.setColor = setColor;
 window.submitGuess = submitGuess;
+window.exitRoom = exitRoom;

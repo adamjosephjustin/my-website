@@ -368,3 +368,48 @@ p {
         width: 90%;
     }
 }
+
+/* Exit Button */
+.btn-exit {
+    background: #e74c3c;
+    color: white;
+    font-family: 'Bangers', cursive;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+.btn-exit:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+}
+
+/* Canvas Improvements */
+.canvas-container {
+    cursor: crosshair !important;
+    position: relative;
+}
+
+.color-dot.active {
+    transform: scale(1.3);
+    box-shadow: 0 0 0 3px var(--accent);
+}
+
+/* Mobile Updates - Bigger Canvas */
+@media (max-width: 768px) {
+    #main-canvas {
+        height: 350px !important;
+    }
+    
+    /* Stack sidebar below canvas */
+    #view-game > div > div:last-child {
+        width: 100% !important;
+        flex-direction: row;
+        gap: 10px;
+    }
+    
+    #view-game > div > div:last-child > .view-card {
+        flex: 1;
+    }
+}
