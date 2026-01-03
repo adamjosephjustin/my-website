@@ -112,7 +112,8 @@ function createGame() {
         currentRound: 0,
         totalRounds: parseInt(state.settings.rounds) || 5,
         currentTurn: 0,
-        playerOrder: [state.id]
+        playerOrder: [state.id],
+        usedWords: [] // Track used words to prevent repetition
     }).then(() => {
         console.log('✅ [CREATE] Room created successfully!');
         enterGameRoom();
@@ -377,9 +378,25 @@ function nextTurn() {
             }
         }
 
-        // Pick word
+        // Pick word (avoid repetition)
         const list = WORD_LIST[data.settings.lang][data.settings.diff];
-        const word = list[Math.floor(Math.random() * list.length)];
+        const usedWords = data.usedWords || [];
+
+        // Filter out used words
+        let availableWords = list.filter(w => !usedWords.includes(w));
+
+        // If all words used, reset
+        if (availableWords.length === 0) {
+            console.log('⚠️ [NEXT] All words used, resetting...');
+            availableWords = list;
+            database.ref(`rooms/${state.room}/usedWords`).set([]);
+        }
+
+        const word = availableWords[Math.floor(Math.random() * availableWords.length)];
+        console.log('⏭️ [NEXT] Selected word:', word, '(', availableWords.length, 'available)');
+
+        // Add to used words
+        usedWords.push(word);
 
         // Set next drawer
         const drawerId = playerOrder[currentTurn];
@@ -390,7 +407,8 @@ function nextTurn() {
             drawer: drawerId,
             currentTurn: currentTurn,
             currentRound: currentRound,
-            action: 'CLEAR'
+            action: 'CLEAR',
+            usedWords: usedWords
         };
 
         console.log('⏭️ [NEXT] Updating Firebase with:', updates);
@@ -418,7 +436,8 @@ function newGame() {
         status: 'LOBBY',
         currentRound: 0,
         currentTurn: 0,
-        drawer: ''
+        drawer: '',
+        usedWords: [] // Reset used words for new game
     });
     // Reset scores
     database.ref(`rooms/${state.room}/players`).once('value', snap => {
