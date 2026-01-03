@@ -246,10 +246,16 @@ function listenToRoom() {
     roomRef.child('drawing').on('child_added', data => drawFromRemote(data.val()));
     roomRef.child('action').on('value', s => { if (s.val() === 'CLEAR') clearCanvasUI(); });
 
-    // 4. Chat
+    // 4. Chat - Listen and Auto-Check Answers (Host only)
     roomRef.child('chat').on('child_added', snap => {
         const msg = snap.val();
         addChatBubble(msg.name, msg.text, msg.type);
+
+        // Host automatically checks all guesses
+        if (state.isHost && msg.type === 'GUESS') {
+            console.log('🎯 [HOST] Checking guess:', msg.text, 'from', msg.name);
+            checkWinCondition(msg.text, msg.name);
+        }
     });
 }
 
@@ -431,29 +437,45 @@ function submitGuess() {
     if (!txt) return;
     input.value = "";
 
-    // Send Guess
+    console.log('💬 [GUESS] Submitting guess:', txt);
+
+    // Send Guess (Host will auto-check it via chat listener)
     database.ref(`rooms/${state.room}/chat`).push({
         name: state.name,
         text: txt,
         type: 'GUESS'
     });
-
-    // Check Win (Client-side optimistic check for fun/speed, ideally server-side)
-    // Checking against known word "wait" - wait, clients don't know word typically?
-    // In this simple version, we trust the client or host logic.
-    // Host will check match.
-    if (state.isHost) checkWinCondition(txt, state.name);
 }
 
 function checkWinCondition(guess, guesserName) {
-    // Host Logic
+    console.log('🎯 [CHECK] Validating guess:', guess, 'against word');
+
     database.ref(`rooms/${state.room}/currentWord`).once('value', snap => {
-        if (guess.toLowerCase() === (snap.val() || "").toLowerCase()) {
+        const correctWord = snap.val() || "";
+        console.log('🎯 [CHECK] Correct word is:', correctWord);
+
+        if (guess.toLowerCase() === correctWord.toLowerCase()) {
+            console.log('✅ [WIN] Correct guess! Advancing turn...');
+
             database.ref(`rooms/${state.room}/chat`).push({
-                name: "REFEREE", text: `${guesserName} CORRECT! 🎉`, type: 'WIN'
+                name: "🎉 GAME",
+                text: `${guesserName} guessed it! Next turn...`,
+                type: 'WIN'
             });
+
+            // Give points
+            database.ref(`rooms/${state.room}/players`).once('value', playersSnap => {
+                const players = playersSnap.val() || {};
+                const winnerId = Object.keys(players).find(id => players[id].name === guesserName);
+                if (winnerId) {
+                    database.ref(`rooms/${state.room}/players/${winnerId}/score`).transaction(score => (score || 0) + 10);
+                }
+            });
+
             // Next turn after 3s
             setTimeout(nextTurn, 3000);
+        } else {
+            console.log('❌ [CHECK] Wrong guess');
         }
     });
 }
