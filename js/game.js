@@ -110,7 +110,7 @@ function createGame() {
         currentWord: "WAITING",
         drawer: "",
         currentRound: 0,
-        totalRounds: 5,
+        totalRounds: parseInt(state.settings.rounds) || 5,
         currentTurn: 0,
         playerOrder: [state.id]
     }).then(() => {
