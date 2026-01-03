@@ -283,3 +283,88 @@ p {
 .fade-in {
     animation: fadeIn 0.5s;
 }
+/* ==========================================
+   MOBILE RESPONSIVE DESIGN
+   ========================================== */
+@media (max-width: 768px) {
+    /* Wizard Screens */
+    .view-card {
+        padding: 20px;
+    }
+    
+    h1 { font-size: 2.5rem; }
+    h2 { font-size: 1.8rem; }
+    
+    .btn-big {
+        min-width: 200px;
+        font-size: 1.5rem;
+    }
+    
+    /* GAME SCREEN - Stack Vertically */
+    #view-game > div {
+        flex-direction: column !important;
+    }
+    
+    /* Hide players list on mobile (save space) */
+    #view-game > div > .view-card:first-child {
+        display: none;
+    }
+    
+    /* Canvas Container - Full Width */
+    #view-game > div > div:nth-child(2) {
+        width: 100% !important;
+    }
+    
+    .canvas-container {
+        width: 100%;
+    }
+    
+    #main-canvas {
+        width: 100% !important;
+        height: auto;
+        max-height: 300px;
+    }
+    
+    /* Toolbar - Wrap colors */
+    .canvas-toolbar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    /* Chat - Show below canvas */
+    #view-game > div > .view-card:last-child {
+        width: 100% !important;
+        margin-top: 10px;
+        padding: 15px;
+    }
+    
+    .chat-box {
+        height: 120px;
+    }
+    
+    /* Game Header - Stack */
+    .game-header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    #word-display {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+    h1 { font-size: 2rem; }
+    
+    .btn-big {
+        font-size: 1.3rem;
+        padding: 12px 30px;
+    }
+    
+    .neat-input {
+        font-size: 1.5rem;
+        width: 90%;
+    }
+}
