@@ -80,7 +80,10 @@
                 <div id="room-badge">Room: ???</div>
                 <div id="word-display" style="font-size:2rem; font-family:'Bangers'; color:var(--dark);">WAITING...
                 </div>
-                <div id="round-display" class="timer-badge"></div>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <div id="turn-display" class="timer-badge" style="background:#FFE66D; color:#2F2F2F;"></div>
+                    <div id="round-display" class="timer-badge"></div>
+                </div>
                 <button class="btn-exit" onclick="exitRoom()">🚪 Exit</button>
             </div>
 
@@ -88,7 +91,9 @@
             <div style="text-align:center; margin:10px 0;">
                 <button id="start-game-btn" class="btn-big btn-primary" onclick="startGame()" style="display:none;">🎮
                     START GAME</button>
-                <button id="new-game-btn" class="btn-big btn-secondary" onclick="newGame()" style="display:none;">🔄
+                <button id="next-turn-btn" class="btn-back" onclick="nextTurn()" style="display:none;">⏭️ NEXT
+                    TURN</button>
+                <button id="new-game-btn" class="btn-big btn-secondary" onclick="newGame())" style="display:none;">🔄
                     PLAY AGAIN</button>
             </div>
 

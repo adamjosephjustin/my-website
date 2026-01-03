@@ -283,21 +283,42 @@ function startGame() {
 }
 
 function nextTurn() {
+    console.log('⏭️ [NEXT] Advancing to next turn...');
+
+    if (!database || !state.room) {
+        console.error('❌ [NEXT] No database or room!');
+        return;
+    }
+
     database.ref(`rooms/${state.room}`).once('value', snap => {
         const data = snap.val();
-        if (!data) return;
+        if (!data) {
+            console.error('❌ [NEXT] Room data not found!');
+            return;
+        }
+
+        console.log('⏭️ [NEXT] Current game state:', {
+            currentTurn: data.currentTurn,
+            currentRound: data.currentRound,
+            totalRounds: data.totalRounds,
+            playerOrder: data.playerOrder
+        });
 
         const playerOrder = data.playerOrder || [];
-        let currentTurn = data.currentTurn || 0;
+        let currentTurn = (data.currentTurn || 0) + 1; // INCREMENT turn
         let currentRound = data.currentRound || 1;
+
+        console.log('⏭️ [NEXT] After increment - Turn:', currentTurn, '/', playerOrder.length);
 
         // Check if round is complete (everyone had a turn)
         if (currentTurn >= playerOrder.length) {
             currentRound++;
             currentTurn = 0;
+            console.log('⏭️ [NEXT] Round complete! Moving to round', currentRound);
 
             // Check if game is finished
             if (currentRound > data.totalRounds) {
+                console.log('🏁 [NEXT] Game finished!');
                 database.ref(`rooms/${state.room}`).update({ status: 'FINISHED' });
                 return;
             }
@@ -309,15 +330,26 @@ function nextTurn() {
 
         // Set next drawer
         const drawerId = playerOrder[currentTurn];
+        console.log('⏭️ [NEXT] Next drawer ID:', drawerId);
 
-        database.ref(`rooms/${state.room}`).update({
+        const updates = {
             currentWord: word,
             drawer: drawerId,
             currentTurn: currentTurn,
             currentRound: currentRound,
             action: 'CLEAR'
+        };
+
+        console.log('⏭️ [NEXT] Updating Firebase with:', updates);
+
+        database.ref(`rooms/${state.room}`).update(updates).then(() => {
+            console.log('✅ [NEXT] Turn advanced successfully!');
+            database.ref(`rooms/${state.room}/drawing`).remove();
+        }).catch(err => {
+            console.error('❌ [NEXT] Failed to update:', err);
         });
-        database.ref(`rooms/${state.room}/drawing`).remove();
+    }).catch(err => {
+        console.error('❌ [NEXT] Failed to read room:', err);
     });
 }
 
