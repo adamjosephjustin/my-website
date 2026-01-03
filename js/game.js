@@ -8,7 +8,7 @@ let state = {
     room: '',
     id: localStorage.getItem('pictionary_player_id') || 'player_' + Math.random().toString(36).substr(2, 9),
     isHost: false,
-    settings: { lang: 'EN', diff: 'EASY' },
+    settings: { lang: 'EN', diff: 'EASY', rounds: 5 },
     isDrawer: false,
     players: [] // Store player order for turns
 };
