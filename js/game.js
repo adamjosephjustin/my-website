@@ -258,7 +258,22 @@ function listenToRoom() {
 
     // 3. Drawing
     roomRef.child('drawing').on('child_added', data => drawFromRemote(data.val()));
-    roomRef.child('action').on('value', s => { if (s.val() === 'CLEAR') clearCanvasUI(); });
+
+    // Canvas Clear Listener
+    roomRef.child('action').on('value', snapshot => {
+        const action = snapshot.val();
+        console.log('🎬 [ACTION] Received action:', action);
+
+        if (action === 'CLEAR') {
+            console.log('🗑️ [ACTION] CLEAR detected - clearing canvas...');
+            clearCanvasUI();
+
+            // Reset action to null to prevent re-triggering
+            setTimeout(() => {
+                database.ref(`rooms/${state.room}/action`).set(null);
+            }, 100);
+        }
+    });
 
     // 4. Chat - Listen and Auto-Check Answers (Host only)
     roomRef.child('chat').on('child_added', snap => {
@@ -478,7 +493,17 @@ function drawFromRemote(d) {
 }
 
 function clearCanvasUI() {
+    console.log('🧹 [CLEARUI] Clearing canvas...');
+
+    if (!canvas || !ctx) {
+        console.error('❌ [CLEARUI] Canvas or context not initialized!');
+        console.log('Canvas:', canvas, 'Context:', ctx);
+        return;
+    }
+
+    console.log('🧹 [CLEARUI] Canvas size:', canvas.width, 'x', canvas.height);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    console.log('✅ [CLEARUI] Canvas cleared successfully');
 }
 
 // ==========================================
