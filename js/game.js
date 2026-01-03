@@ -82,10 +82,22 @@ function selectSetting(type, value) {
 // ==========================================
 
 function createGame() {
+    console.log('🎮 [CREATE] Starting game creation...');
+    console.log('🎮 [CREATE] Player:', state.name, 'ID:', state.id);
+
     state.isHost = true;
     state.room = Math.floor(1000 + Math.random() * 9000).toString();
+    console.log('🎮 [CREATE] Room code generated:', state.room);
+
+    if (!database) {
+        console.error('❌ [CREATE] Firebase database NOT initialized!');
+        alert('Firebase connection error! Refresh the page.');
+        return;
+    }
 
     const roomRef = database.ref('rooms/' + state.room);
+    console.log('🎮 [CREATE] Writing to Firebase...');
+
     roomRef.set({
         status: "LOBBY",
         settings: state.settings,
@@ -98,9 +110,13 @@ function createGame() {
         totalRounds: 5,
         currentTurn: 0,
         playerOrder: [state.id]
+    }).then(() => {
+        console.log('✅ [CREATE] Room created successfully!');
+        enterGameRoom();
+    }).catch(err => {
+        console.error('❌ [CREATE] Firebase write FAILED:', err);
+        alert('Failed to create room: ' + err.message);
     });
-
-    enterGameRoom();
 }
 
 function joinGame() {
@@ -308,8 +324,16 @@ let color = '#000';
 let lastPos = null;
 
 function setupCanvas() {
+    console.log('🎨 [CANVAS] Setting up canvas...');
     canvas = document.getElementById('main-canvas');
+
+    if (!canvas) {
+        console.error('❌ [CANVAS] Canvas element NOT found!');
+        return;
+    }
+
     ctx = canvas.getContext('2d');
+    console.log('✅ [CANVAS] Canvas initialized:', canvas.width, 'x', canvas.height);
 
     // Mouse & Touch Events
     ['mousedown', 'touchstart'].forEach(evt =>
@@ -318,6 +342,8 @@ function setupCanvas() {
         canvas.addEventListener(evt, e => moveDraw(e)));
     ['mouseup', 'touchend'].forEach(evt =>
         canvas.addEventListener(evt, () => { drawing = false; lastPos = null; }));
+
+    console.log('✅ [CANVAS] Event listeners attached');
 }
 
 function getCoords(e) {
@@ -336,10 +362,17 @@ function getCoords(e) {
 }
 
 function startDraw(e) {
-    if (!state.isDrawer) return;
+    console.log('✏️ [DRAW] Start draw - isDrawer:', state.isDrawer, 'Room:', state.room);
+
+    if (!state.isDrawer) {
+        console.warn('✏️ [DRAW] Not allowed to draw (not drawer)');
+        return;
+    }
+
     e.preventDefault();
     drawing = true;
     lastPos = getCoords(e);
+    console.log('✏️ [DRAW] Drawing started at:', lastPos);
 }
 
 function moveDraw(e) {
@@ -351,10 +384,17 @@ function moveDraw(e) {
     renderLine(lastPos, newPos, color);
 
     // Send Remote
+    if (!database || !state.room) {
+        console.error('❌ [DRAW] Cannot save - database:', !!database, 'room:', state.room);
+        return;
+    }
+
     database.ref(`rooms/${state.room}/drawing`).push({
         x0: lastPos.x, y0: lastPos.y,
         x1: newPos.x, y1: newPos.y,
         c: color
+    }).catch(err => {
+        console.error('❌ [DRAW] Failed to save drawing:', err);
     });
 
     lastPos = newPos;
