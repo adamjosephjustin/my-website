@@ -238,10 +238,18 @@ function setupCanvas() {
 }
 
 function getCoords(e) {
-    const r = canvas.getBoundingClientRect();
+    const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: clientX - r.left, y: clientY - r.top };
+
+    // Scale coordinates: canvas internal size vs displayed size
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+    };
 }
 
 function startDraw(e) {
