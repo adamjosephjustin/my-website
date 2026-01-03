@@ -466,6 +466,11 @@ function setupCanvas() {
     }
 
     ctx = canvas.getContext('2d');
+
+    // Enable smooth drawing
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
     console.log('✅ [CANVAS] Canvas initialized:', canvas.width, 'x', canvas.height);
 
     // Mouse & Touch Events
@@ -540,6 +545,7 @@ function renderLine(p1, p2, c) {
     ctx.strokeStyle = c;
     ctx.lineWidth = 5;
     ctx.lineCap = 'round';
+    ctx.lineJoin = 'round'; // Smooth corners
     ctx.stroke();
 }
 
