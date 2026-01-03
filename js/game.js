@@ -220,10 +220,11 @@ function listenToRoom() {
             document.getElementById('turn-display').innerText = '';
         }
 
-        // Show/Hide NEXT button (Host only, during play)
+        // Show/Hide NEXT button (Host only, after correct guess)
         const nextBtn = document.getElementById('next-turn-btn');
         if (nextBtn) {
-            nextBtn.style.display = (state.isHost && data.status === 'PLAYING') ? 'inline-block' : 'none';
+            // Hide by default, will be shown when someone guesses correctly
+            nextBtn.style.display = 'none';
         }
 
         // Drawer Logic
@@ -344,6 +345,13 @@ function nextTurn() {
 
         database.ref(`rooms/${state.room}`).update(updates).then(() => {
             console.log('✅ [NEXT] Turn advanced successfully!');
+
+            // Hide NEXT button when turn advances
+            const nextBtn = document.getElementById('next-turn-btn');
+            if (nextBtn) {
+                nextBtn.style.display = 'none';
+            }
+
             database.ref(`rooms/${state.room}/drawing`).remove();
         }).catch(err => {
             console.error('❌ [NEXT] Failed to update:', err);
@@ -551,10 +559,14 @@ window.clearBoard = () => {
         console.error('❌ [CLEAR] No database or room');
         return;
     }
+
+    console.log('🗑️ [CLEAR] Sending CLEAR action to Firebase...');
+
     database.ref(`rooms/${state.room}/action`).set('CLEAR').then(() => {
-        console.log('✅ [CLEAR] Clear action sent to Firebase');
+        console.log('✅ [CLEAR] Clear action sent successfully');
     }).catch(err => {
-        console.error('❌ [CLEAR] Failed:', err);
+        console.error('❌ [CLEAR] Failed:', err.message);
+        alert('Clear failed: ' + err.message);
     });
 };
 
