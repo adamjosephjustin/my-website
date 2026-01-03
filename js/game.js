@@ -9,7 +9,8 @@ let state = {
     id: 'player_' + Math.random().toString(36).substr(2, 9),
     isHost: false,
     settings: { lang: 'EN', diff: 'EASY' },
-    isDrawer: false
+    isDrawer: false,
+    players: [] // Store player order for turns
 };
 
 // DOM ELEMENTS
@@ -92,7 +93,11 @@ function createGame() {
             [state.id]: { name: state.name, score: 0, isHost: true }
         },
         currentWord: "WAITING",
-        drawer: ""
+        drawer: "",
+        currentRound: 0,
+        totalRounds: 5,
+        currentTurn: 0,
+        playerOrder: [state.id]
     });
 
     enterGameRoom();
@@ -108,6 +113,16 @@ function joinGame() {
             database.ref(`rooms/${state.room}/players/${state.id}`).set({
                 name: state.name, score: 0, isHost: false
             });
+
+            // Add to player order
+            database.ref(`rooms/${state.room}/playerOrder`).once('value', orderSnap => {
+                const order = orderSnap.val() || [];
+                if (!order.includes(state.id)) {
+                    order.push(state.id);
+                    database.ref(`rooms/${state.room}/playerOrder`).set(order);
+                }
+            });
+
             enterGameRoom();
         } else {
             alert("Oops! I can't find that room. 🤷‍♂️");
@@ -169,21 +184,42 @@ function listenToRoom() {
         const data = snap.val();
         if (!data) return;
 
+        // Store player list locally
+        state.players = data.playerOrder || [];
+
+        // Update round display
+        if (data.status === 'PLAYING') {
+            document.getElementById('round-display').innerText = `Round ${data.currentRound}/${data.totalRounds}`;
+        } else {
+            document.getElementById('round-display').innerText = '';
+        }
+
         // Drawer Logic
         if (data.drawer === state.id) {
             state.isDrawer = true;
-            document.getElementById('word-display').innerText = "DRAW: " + data.currentWord;
+            document.getElementById('word-display').innerText = "YOUR WORD: " + data.currentWord;
         } else {
             state.isDrawer = false;
-            document.getElementById('word-display').innerText = data.drawer ? "GUESS THE DRAWING!" : "WAITING FOR PLAYERS...";
+            if (data.status === 'PLAYING') {
+                const drawerName = Object.values(data.players || {}).find(p => data.playerOrder?.[data.currentTurn] === Object.keys(data.players).find(k => data.players[k].name === p.name))?.name || 'Someone';
+                document.getElementById('word-display').innerText = `${drawerName} is drawing... (${data.currentWord.replace(/./g, '?')})`;
+            } else if (data.status === 'LOBBY') {
+                document.getElementById('word-display').innerText = state.isHost ? "Click START when ready!" : "Waiting for host...";
+            } else {
+                document.getElementById('word-display').innerText = "GAME OVER!";
+            }
         }
 
-        // Toolbar Visibility
-        document.querySelector('.canvas-toolbar').classList.toggle('hidden', !state.isDrawer);
+        // Show/Hide Start Button (Host only, Lobby only)
+        const startBtn = document.getElementById('start-game-btn');
+        if (startBtn) {
+            startBtn.style.display = (state.isHost && data.status === 'LOBBY' && Object.keys(data.players || {}).length >= 2) ? 'block' : 'none';
+        }
 
-        // Lobby -> Playing transition
-        if (state.isHost && data.status === "LOBBY" && Object.keys(data.players || {}).length >= 2) {
-            startRound();
+        // Show/Hide New Game Button
+        const newGameBtn = document.getElementById('new-game-btn');
+        if (newGameBtn) {
+            newGameBtn.style.display = (state.isHost && data.status === 'FINISHED') ? 'block' : 'none';
         }
     });
 
@@ -198,22 +234,69 @@ function listenToRoom() {
     });
 }
 
-function startRound() {
-    const list = WORD_LIST[state.settings.lang][state.settings.diff];
-    const word = list[Math.floor(Math.random() * list.length)];
-
-    // Pick next drawer? Random for now.
-    const playerIds = Object.keys(state.players || {}); // Need to store players locally to pick?
-    // Simplified: Host always sets drawer to Self for Test, or Random.
-    // Let's just set Host as Drawer for first round.
-
+function startGame() {
+    // Host starts the game
     database.ref(`rooms/${state.room}`).update({
         status: "PLAYING",
-        currentWord: word,
-        drawer: state.id, // Host starts
-        action: 'CLEAR'
+        currentRound: 1,
+        currentTurn: 0
     });
-    database.ref(`rooms/${state.room}/drawing`).remove();
+    nextTurn();
+}
+
+function nextTurn() {
+    database.ref(`rooms/${state.room}`).once('value', snap => {
+        const data = snap.val();
+        if (!data) return;
+
+        const playerOrder = data.playerOrder || [];
+        let currentTurn = data.currentTurn || 0;
+        let currentRound = data.currentRound || 1;
+
+        // Check if round is complete (everyone had a turn)
+        if (currentTurn >= playerOrder.length) {
+            currentRound++;
+            currentTurn = 0;
+
+            // Check if game is finished
+            if (currentRound > data.totalRounds) {
+                database.ref(`rooms/${state.room}`).update({ status: 'FINISHED' });
+                return;
+            }
+        }
+
+        // Pick word
+        const list = WORD_LIST[data.settings.lang][data.settings.diff];
+        const word = list[Math.floor(Math.random() * list.length)];
+
+        // Set next drawer
+        const drawerId = playerOrder[currentTurn];
+
+        database.ref(`rooms/${state.room}`).update({
+            currentWord: word,
+            drawer: drawerId,
+            currentTurn: currentTurn,
+            currentRound: currentRound,
+            action: 'CLEAR'
+        });
+        database.ref(`rooms/${state.room}/drawing`).remove();
+    });
+}
+
+function newGame() {
+    database.ref(`rooms/${state.room}`).update({
+        status: 'LOBBY',
+        currentRound: 0,
+        currentTurn: 0,
+        drawer: ''
+    });
+    // Reset scores
+    database.ref(`rooms/${state.room}/players`).once('value', snap => {
+        const players = snap.val() || {};
+        Object.keys(players).forEach(id => {
+            database.ref(`rooms/${state.room}/players/${id}/score`).set(0);
+        });
+    });
 }
 
 // ==========================================
@@ -326,8 +409,8 @@ function checkWinCondition(guess, guesserName) {
             database.ref(`rooms/${state.room}/chat`).push({
                 name: "REFEREE", text: `${guesserName} CORRECT! 🎉`, type: 'WIN'
             });
-            // Loop round
-            setTimeout(startRound, 3000);
+            // Next turn after 3s
+            setTimeout(nextTurn, 3000);
         }
     });
 }
@@ -364,3 +447,6 @@ window.joinGame = joinGame;
 window.setColor = setColor;
 window.submitGuess = submitGuess;
 window.exitRoom = exitRoom;
+window.startGame = startGame;
+window.newGame = newGame;
+window.nextTurn = nextTurn;
