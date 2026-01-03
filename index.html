@@ -80,41 +80,49 @@
                 <div id="room-badge">Room: ???</div>
                 <div id="word-display" style="font-size:2rem; font-family:'Bangers'; color:var(--dark);">WAITING...
                 </div>
-                <div class="timer-badge">60s</div>
+                <button class="btn-exit" onclick="exitRoom()">🚪 Exit</button>
             </div>
 
-            <div style="display:flex; gap:20px;">
-                <!-- PLAYERS -->
-                <div class="view-card" style="width:200px; padding:20px; text-align:left;">
-                    <h3>Players</h3>
-                    <div id="players-list">Loading...</div>
-                </div>
-
-                <!-- CANVAS -->
-                <div style="flex:1;">
+            <div style="display:flex; gap:20px; flex-wrap: wrap;">
+                <!-- MAIN CANVAS AREA -->
+                <div style="flex:1; min-width:300px;">
                     <div class="canvas-container">
-                        <canvas id="main-canvas" width="600" height="400" style="width:100%"></canvas>
+                        <canvas id="main-canvas" width="800" height="500" style="width:100%; display:block;"></canvas>
                     </div>
 
-                    <div class="canvas-toolbar hidden">
-                        <div class="color-dot active" style="background:black" onclick="setColor('#000')"></div>
-                        <div class="color-dot" style="background:#ff4757" onclick="setColor('#ff4757')"></div>
-                        <div class="color-dot" style="background:#2ed573" onclick="setColor('#2ed573')"></div>
-                        <div class="color-dot" style="background:#1e90ff" onclick="setColor('#1e90ff')"></div>
+                    <!-- COLOR TOOLBAR - Always visible -->
+                    <div class="canvas-toolbar" style="margin-top:15px; display:flex; justify-content:center;">
+                        <div class="color-dot active" style="background:black" onclick="setColor('#000', this)"></div>
+                        <div class="color-dot" style="background:#ff4757" onclick="setColor('#ff4757', this)"></div>
+                        <div class="color-dot" style="background:#2ed573" onclick="setColor('#2ed573', this)"></div>
+                        <div class="color-dot" style="background:#1e90ff" onclick="setColor('#1e90ff', this)"></div>
+                        <div class="color-dot" style="background:#ffa502" onclick="setColor('#ffa502', this)"></div>
+                        <div class="color-dot" style="background:#ff6348" onclick="setColor('#ff6348', this)"></div>
                         <button onclick="clearBoard()"
-                            style="margin-left:20px; padding:5px 15px; border-radius:20px; background:#dfe4ea; border:none;">🗑️
-                            Clear</button>
+                            style="margin-left:20px; padding:8px 20px; border-radius:20px; background:#e74c3c; color:white; border:none; font-family:'Bangers'; font-size:1.1rem; cursor:pointer;">🗑️
+                            Clear All</button>
                     </div>
                 </div>
 
-                <!-- CHAT -->
-                <div class="view-card" style="width:250px; padding:20px; display:flex; flex-direction:column;">
-                    <h3>Guesses</h3>
-                    <div id="chat-box" class="chat-box"></div>
-                    <div style="display:flex; margin-top:10px;">
-                        <input id="input-guess" type="text"
-                            style="width:100%; padding:10px; border-radius:10px; border:2px solid #ddd;"
-                            placeholder="Type guess..." onkeydown="if(event.key==='Enter') submitGuess()">
+                <!-- SIDEBAR: PLAYERS + CHAT -->
+                <div style="width:280px; display:flex; flex-direction:column; gap:15px;">
+                    <!-- Players -->
+                    <div class="view-card" style="padding:15px; flex-shrink:0;">
+                        <h3 style="margin:0 0 10px 0;">Players</h3>
+                        <div id="players-list" style="font-size:0.9rem;">Loading...</div>
+                    </div>
+
+                    <!-- Chat -->
+                    <div class="view-card" style="padding:15px; flex:1; display:flex; flex-direction:column;">
+                        <h3 style="margin:0 0 10px 0;">Guesses</h3>
+                        <div id="chat-box" class="chat-box" style="flex:1;"></div>
+                        <div style="display:flex; gap:5px; margin-top:10px;">
+                            <input id="input-guess" type="text"
+                                style="flex:1; padding:8px; border-radius:10px; border:2px solid #ddd; font-size:1rem;"
+                                placeholder="Type guess..." onkeydown="if(event.key==='Enter') submitGuess()">
+                            <button onclick="submitGuess()"
+                                style="padding:8px 15px; background:var(--success); color:white; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">SEND</button>
+                        </div>
                     </div>
                 </div>
             </div>
