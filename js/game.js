@@ -220,19 +220,39 @@ function listenToRoom() {
             document.getElementById('turn-display').innerText = '';
         }
 
-        // Show/Hide NEXT button (Host only, after correct guess)
-        const nextBtn = document.getElementById('next-turn-btn');
-        if (nextBtn) {
-            // Hide by default, will be shown when someone guesses correctly
-            nextBtn.style.display = 'none';
+        // Show/Hide Skip Button (Host only, during play)
+        const skipBtn = document.getElementById('skip-turn-btn');
+        if (skipBtn) {
+            skipBtn.style.display = (state.isHost && data.status === 'PLAYING') ? 'inline-block' : 'none';
         }
 
         // Drawer Logic
         if (data.drawer === state.id) {
             state.isDrawer = true;
             document.getElementById('word-display').innerText = "YOUR WORD: " + data.currentWord;
+
+            // Disable guess input for drawer
+            const guessInput = document.getElementById('input-guess');
+            const sendBtn = document.getElementById('send-guess-btn');
+            if (guessInput && sendBtn) {
+                guessInput.disabled = true;
+                guessInput.placeholder = "You're drawing!";
+                sendBtn.disabled = true;
+                sendBtn.style.opacity = '0.5';
+            }
         } else {
             state.isDrawer = false;
+
+            // Enable guess input for guessers
+            const guessInput = document.getElementById('input-guess');
+            const sendBtn = document.getElementById('send-guess-btn');
+            if (guessInput && sendBtn) {
+                guessInput.disabled = false;
+                guessInput.placeholder = "Type your guess...";
+                sendBtn.disabled = false;
+                sendBtn.style.opacity = '1';
+            }
+
             if (data.status === 'PLAYING') {
                 const drawerName = Object.values(data.players || {}).find(p => data.playerOrder?.[data.currentTurn] === Object.keys(data.players).find(k => data.players[k].name === p.name))?.name || 'Someone';
                 document.getElementById('word-display').innerText = `${drawerName} is drawing... (${data.currentWord.replace(/./g, '?')})`;
@@ -283,7 +303,24 @@ function listenToRoom() {
         // Host automatically checks all guesses
         if (state.isHost && msg.type === 'GUESS') {
             console.log('🎯 [HOST] Checking guess:', msg.text, 'from', msg.name);
-            checkWinCondition(msg.text, msg.name);
+
+            // Don't check if the guesser is the current drawer (prevent self-guessing)
+            database.ref(`rooms/${state.room}`).once('value', roomSnap => {
+                const roomData = roomSnap.val();
+                const currentDrawerId = roomData?.playerOrder?.[roomData?.currentTurn];
+                const players = roomData?.players || {};
+                const guesserName = msg.name;
+
+                // Find if this guesser is the drawer
+                const guesserId = Object.keys(players).find(id => players[id].name === guesserName);
+
+                if (guesserId === currentDrawerId) {
+                    console.log('⚠️ [HOST] Drawer tried to guess - ignoring');
+                    return;
+                }
+
+                checkWinCondition(msg.text, msg.name);
+            });
         }
     });
 }
