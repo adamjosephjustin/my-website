@@ -6,12 +6,15 @@
 let state = {
     name: localStorage.getItem('pictionary_name') || '',
     room: '',
-    id: 'player_' + Math.random().toString(36).substr(2, 9),
+    id: localStorage.getItem('pictionary_player_id') || 'player_' + Math.random().toString(36).substr(2, 9),
     isHost: false,
     settings: { lang: 'EN', diff: 'EASY' },
     isDrawer: false,
     players: [] // Store player order for turns
 };
+
+// Save player ID to localStorage so refreshing doesn't create a new player
+localStorage.setItem('pictionary_player_id', state.id);
 
 // DOM ELEMENTS
 const views = {
@@ -475,7 +478,18 @@ function setColor(c, element) {
     if (element) element.classList.add('active');
 }
 
-window.clearBoard = () => database.ref(`rooms/${state.room}/action`).set('CLEAR');
+window.clearBoard = () => {
+    console.log('🗑️ [CLEAR] Clearing canvas...');
+    if (!database || !state.room) {
+        console.error('❌ [CLEAR] No database or room');
+        return;
+    }
+    database.ref(`rooms/${state.room}/action`).set('CLEAR').then(() => {
+        console.log('✅ [CLEAR] Clear action sent to Firebase');
+    }).catch(err => {
+        console.error('❌ [CLEAR] Failed:', err);
+    });
+};
 
 // Re-expose standard functions to window for HTML onclicks
 window.submitName = submitName;
