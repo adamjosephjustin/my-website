@@ -1,70 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adam's World: The Junior Coding Academy</title>
+    <title>Adam's Pictionary Party 🎨</title>
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
+
 <body>
 
-    <header class="academy-header">
-        <h1>Welcome to Adam's World 🌎</h1>
-        <h2>The Junior Coding Academy</h2>
-        <p>Start your journey from Logic Puzzles to Python basics and earn your certificates!</p>
-    </header>
-
-    <main class="course-index">
-        <section class="certificate-track" id="beginner-track">
-            <h3 class="track-title beginner-color">🥇 Beginner Certificate: Logic Puzzles (L1-L5)</h3>
-            <p class="track-status">Status: <span id="status-beginner">Not Started</span></p>
-            <div class="lesson-grid">
-                <a href="lessons/lesson1.html" class="lesson-card">L1: Robot Path</a>
-                <a href="#" class="lesson-card locked">L2: Where to Go?</a>
-                <a href="#" class="lesson-card locked">L3: Fixing the Wire</a>
-                <a href="#" class="lesson-card locked">L4: Repeating Dance</a>
-                <a href="#" class="lesson-card locked">L5: The Blueprint</a>
+    <div id="app-container">
+        <!-- 1. WELCOME STEP -->
+        <div id="view-welcome" class="view-card">
+            <h1>🎨 Pictionary Party!</h1>
+            <p>Welcome! What is your name?</p>
+            <input type="text" id="input-name" class="neat-input" placeholder="Adam..." maxlength="12">
+            <div class="btn-group">
+                <button class="btn-big btn-primary" onclick="submitName()">LET'S GO! 🚀</button>
             </div>
-            <button class="cert-btn hidden" id="cert-beginner" onclick="showCertificate('Beginner')">Claim Certificate!</button>
-        </section>
+        </div>
 
-        <section class="certificate-track" id="intermediate-track">
-            <h3 class="track-title intermediate-color">🥈 Intermediate Certificate: Coding Basics (L6-L10)</h3>
-            <p class="track-status">Status: <span id="status-intermediate">Locked</span></p>
-            <div class="lesson-grid">
-                <a href="#" class="lesson-card locked">L6: Counting Game</a>
-                <a href="#" class="lesson-card locked">L7: True or False</a>
-                <a href="#" class="lesson-card locked">L8: List of Toys</a>
-                <a href="#" class="lesson-card locked">L9: Missing Step</a>
-                <a href="#" class="lesson-card locked">L10: Building a Shape</a>
+        <!-- 2. MODE SELECT -->
+        <div id="view-mode-select" class="view-card hidden">
+            <h2>Hi, <span id="display-name" style="color:var(--primary)">Friend</span>! 👋</h2>
+            <p>What do you want to do?</p>
+            <div class="btn-group">
+                <button class="btn-big btn-secondary" onclick="enterJoinMode()">🤝 JOIN A FRIEND</button>
+                <div style="font-size:0.8rem; color:#888;">- OR -</div>
+                <button class="btn-big btn-primary" onclick="enterCreateMode()">✨ CREATE NEW ROOM</button>
             </div>
-            <button class="cert-btn hidden" id="cert-intermediate" onclick="showCertificate('Intermediate')">Claim Certificate!</button>
-        </section>
+            <button class="btn-back" onclick="location.reload()">Back</button>
+        </div>
 
-        <section class="certificate-track" id="pro-track">
-            <h3 class="track-title pro-color">🥉 Professional Certificate: Python Intro (L11-L15)</h3>
-            <p class="track-status">Status: <span id="status-pro">Locked</span></p>
-            <div class="lesson-grid">
-                <a href="#" class="lesson-card locked">L11: Hello Python!</a>
-                <a href="#" class="lesson-card locked">L12: Keyboard Talk</a>
-                <a href="#" class="lesson-card locked">L13: Math Machines</a>
-                <a href="#" class="lesson-card locked">L14: If the Number...</a>
-                <a href="#" class="lesson-card locked">L15: Final Code</a>
-            </div>
-            <button class="cert-btn hidden" id="cert-pro" onclick="showCertificate('Professional')">Claim Certificate!</button>
-        </section>
-    </main>
+        <!-- 3. CREATE SETTINGS -->
+        <div id="view-create" class="view-card hidden">
+            <h2>Create Room</h2>
 
-    <div id="certificate-modal" class="modal-backdrop hidden" onclick="hideCertificate()">
-        <div class="certificate-box" id="certificate-content" onclick="event.stopPropagation()">
+            <p>Language</p>
+            <div class="toggle-group" data-type="lang">
+                <div class="toggle-option selected" data-value="EN" onclick="selectSetting('lang','EN')">🇬🇧 English
+                </div>
+                <div class="toggle-option" data-value="NL" onclick="selectSetting('lang','NL')">🇳🇱 Dutch</div>
             </div>
+
+            <p>Difficulty</p>
+            <div class="toggle-group" data-type="diff">
+                <div class="toggle-option selected" data-value="EASY" onclick="selectSetting('diff','EASY')">😄 Easy
+                </div>
+                <div class="toggle-option" data-value="HARD" onclick="selectSetting('diff','HARD')">🤯 Hard</div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-big btn-primary" onclick="createGame()">START GAME ▶</button>
+            </div>
+            <button class="btn-back" onclick="switchView('mode')">Back</button>
+        </div>
+
+        <!-- 4. JOIN ROOM -->
+        <div id="view-join" class="view-card hidden">
+            <h2>Join Room</h2>
+            <p>Enter the 4-digit code:</p>
+            <input type="number" id="input-room-code" class="neat-input code-input" placeholder="0000">
+            <div class="btn-group">
+                <button class="btn-big btn-secondary" onclick="joinGame()">JOIN NOW! 🚀</button>
+            </div>
+            <button class="btn-back" onclick="switchView('mode')">Back</button>
+        </div>
+
+        <!-- 5. GAME BOARD -->
+        <div id="view-game" class="hidden">
+            <div class="game-header">
+                <div id="room-badge">Room: ???</div>
+                <div id="word-display" style="font-size:2rem; font-family:'Bangers'; color:var(--dark);">WAITING...
+                </div>
+                <div class="timer-badge">60s</div>
+            </div>
+
+            <div style="display:flex; gap:20px;">
+                <!-- PLAYERS -->
+                <div class="view-card" style="width:200px; padding:20px; text-align:left;">
+                    <h3>Players</h3>
+                    <div id="players-list">Loading...</div>
+                </div>
+
+                <!-- CANVAS -->
+                <div style="flex:1;">
+                    <div class="canvas-container">
+                        <canvas id="main-canvas" width="600" height="400" style="width:100%"></canvas>
+                    </div>
+
+                    <div class="canvas-toolbar hidden">
+                        <div class="color-dot active" style="background:black" onclick="setColor('#000')"></div>
+                        <div class="color-dot" style="background:#ff4757" onclick="setColor('#ff4757')"></div>
+                        <div class="color-dot" style="background:#2ed573" onclick="setColor('#2ed573')"></div>
+                        <div class="color-dot" style="background:#1e90ff" onclick="setColor('#1e90ff')"></div>
+                        <button onclick="clearBoard()"
+                            style="margin-left:20px; padding:5px 15px; border-radius:20px; background:#dfe4ea; border:none;">🗑️
+                            Clear</button>
+                    </div>
+                </div>
+
+                <!-- CHAT -->
+                <div class="view-card" style="width:250px; padding:20px; display:flex; flex-direction:column;">
+                    <h3>Guesses</h3>
+                    <div id="chat-box" class="chat-box"></div>
+                    <div style="display:flex; margin-top:10px;">
+                        <input id="input-guess" type="text"
+                            style="width:100%; padding:10px; border-radius:10px; border:2px solid #ddd;"
+                            placeholder="Type guess..." onkeydown="if(event.key==='Enter') submitGuess()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <script src="js/script.js"></script>
-    <script>
-        // Initialize state on load
-        document.addEventListener('DOMContentLoaded', updateCourseIndex);
-    </script>
+    <!-- SCRIPTS -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/words.js"></script>
+    <script src="js/game.js"></script>
 </body>
+
 </html>
