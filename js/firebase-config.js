@@ -10,7 +10,7 @@
 const firebaseConfig = {
     apiKey: "AIzaSyB86lfWxpcCOLXTFSbVdUPd8870c67m1Oo",
     authDomain: "adams-pictionary.firebaseapp.com",
-    databaseURL: "https://adams-pictionary-default-rtdb.firebaseio.com",
+    databaseURL: "https://adams-pictionary-default-rtdb.europe-west1.firebasedatabase.app/",
     projectId: "adams-pictionary",
     storageBucket: "adams-pictionary.firebasestorage.app",
     messagingSenderId: "452825963356",
