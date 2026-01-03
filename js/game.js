@@ -208,9 +208,22 @@ function listenToRoom() {
 
         // Update round display
         if (data.status === 'PLAYING') {
+            const playerOrder = data.playerOrder || [];
+            const players = data.players || {};
+            const currentDrawerId = playerOrder[data.currentTurn];
+            const currentDrawerName = players[currentDrawerId]?.name || 'Unknown';
+
             document.getElementById('round-display').innerText = `Round ${data.currentRound}/${data.totalRounds}`;
+            document.getElementById('turn-display').innerText = `${currentDrawerName}'s Turn`;
         } else {
             document.getElementById('round-display').innerText = '';
+            document.getElementById('turn-display').innerText = '';
+        }
+
+        // Show/Hide NEXT button (Host only, during play)
+        const nextBtn = document.getElementById('next-turn-btn');
+        if (nextBtn) {
+            nextBtn.style.display = (state.isHost && data.status === 'PLAYING') ? 'inline-block' : 'none';
         }
 
         // Drawer Logic
