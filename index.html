@@ -95,14 +95,10 @@
                 <button class="btn-exit" onclick="exitRoom()">🚪 Exit</button>
             </div>
 
-            <!-- HOST CONTROLS -->
+            <!-- HOST CONTROLS - TOP -->
             <div style="text-align:center; margin:10px 0;">
                 <button id="start-game-btn" class="btn-big btn-primary" onclick="startGame()" style="display:none;">🎮
                     START GAME</button>
-                <button id="skip-word-btn" class="btn-back" onclick="skipWord()"
-                    style="display:none; background:#ff6b6b;">😵 Can't Draw This!</button>
-                <button id="skip-turn-btn" class="btn-back" onclick="nextTurn()" style="display:none;">⏩ SKIP
-                    TURN</button>
                 <button id="new-game-btn" class="btn-big btn-secondary" onclick="newGame()" style="display:none;">🔄
                     PLAY AGAIN</button>
             </div>
@@ -125,6 +121,16 @@
                         <button onclick="clearBoard()"
                             style="margin-left:20px; padding:8px 20px; border-radius:20px; background:#e74c3c; color:white; border:none; font-family:'Bangers'; font-size:1.1rem; cursor:pointer;">🗑️
                             Clear All</button>
+                    </div>
+
+                    <!-- GAME CONTROLS - Below canvas -->
+                    <div
+                        style="text-align:center; margin-top:10px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                        <button id="skip-word-btn" class="btn-back" onclick="skipWord()"
+                            style="display:none; background:#ff6b6b; padding:6px 12px; font-size:0.9rem;">😵 Can't Draw
+                            This</button>
+                        <button id="skip-turn-btn" class="btn-back" onclick="nextTurn()"
+                            style="display:none; padding:6px 12px; font-size:0.9rem;">⏩ Skip Turn</button>
                     </div>
                 </div>
 
