@@ -153,6 +153,11 @@ function joinGame() {
 function enterGameRoom() {
     document.getElementById('room-badge').innerText = `Room: ${state.room}`;
     localStorage.setItem('pictionary_last_room', state.room); // Save for rejoin
+
+    // Store listener start time to avoid processing old messages
+    state.listenerStartTime = Date.now();
+    console.log('👂 [LISTENER] Start time:', state.listenerStartTime);
+
     switchView('game');
     listenToRoom();
 }
@@ -294,15 +299,22 @@ function listenToRoom() {
                 database.ref(`rooms/${state.room}/action`).set(null);
             }, 100);
         }
-    });
-
-    // 4. Chat - Listen and Auto-Check Answers (Host only)
-    roomRef.child('chat').on('child_added', snap => {
         const msg = snap.val();
+
+        // Always show message in chat
         addChatBubble(msg.name, msg.text, msg.type);
 
         // Host automatically checks all guesses
         if (state.isHost && msg.type === 'GUESS') {
+            // Check if message is from before we joined (avoid processing old messages)
+            const messageTime = msg.timestamp || 0;
+            const listenerStart = state.listenerStartTime || 0;
+
+            if (messageTime < listenerStart - 1000) { // 1s grace period
+                console.log('⚠️ [HOST] Skipping old message from before rejoin');
+                return;
+            }
+
             console.log('🎯 [HOST] Checking guess:', msg.text, 'from', msg.name);
 
             // Don't check if the guesser is the current drawer (prevent self-guessing)
@@ -320,6 +332,10 @@ function listenToRoom() {
                     return;
                 }
 
+                checkWinCondition(msg.text, msg.name);
+            }).catch(err => {
+                console.error('❌ [HOST] Error checking drawer status:', err);
+                // Still check the guess even if we can't verify drawer status
                 checkWinCondition(msg.text, msg.name);
             });
         }
@@ -583,7 +599,8 @@ function submitGuess() {
     database.ref(`rooms/${state.room}/chat`).push({
         name: state.name,
         text: txt,
-        type: 'GUESS'
+        type: 'GUESS',
+        timestamp: Date.now() // Add timestamp for rejoin handling
     });
 }
 
