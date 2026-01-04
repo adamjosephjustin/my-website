@@ -41,6 +41,15 @@ window.onload = () => {
             joinGame();
         }
     }
+
+    // Warn before leaving page if in active game
+    window.addEventListener('beforeunload', (e) => {
+        if (state.room && document.getElementById('view-game').classList.contains('hidden') === false) {
+            e.preventDefault();
+            e.returnValue = 'Are you sure you want to leave the game?';
+            return 'Are you sure you want to leave the game?';
+        }
+    });
 };
 
 // ==========================================
@@ -197,8 +206,8 @@ function listenToRoom() {
         // Host Auto-Start Check (Simple V1: Host is drawer if ID matches drawer, else wait)
         if (state.isHost && !state.isDrawer && Object.keys(players).length > 1) {
             // Logic to start game if not started?
-            // Keeping it manual for now or auto on 2nd player? 
-            // Let's stick to the previous simple logic: Host starts round 1 manually via a button? 
+            // Keeping it manual for now or auto on 2nd player?
+            // Let's stick to the previous simple logic: Host starts round 1 manually via a button?
             // Or auto. The previous logic had auto-start.
             // We'll leave the auto-start logic from previous iteration if it works, or add a 'Start' button later.
         }
@@ -246,6 +255,10 @@ function listenToRoom() {
                 sendBtn.disabled = true;
                 sendBtn.style.opacity = '0.5';
             }
+
+            // Show skip button for drawer
+            const skipWordBtn = document.getElementById('skip-word-btn');
+            if (skipWordBtn) skipWordBtn.style.display = 'inline-block';
         } else {
             state.isDrawer = false;
 
@@ -258,6 +271,10 @@ function listenToRoom() {
                 sendBtn.disabled = false;
                 sendBtn.style.opacity = '1';
             }
+
+            // Hide skip button for guessers
+            const skipWordBtn = document.getElementById('skip-word-btn');
+            if (skipWordBtn) skipWordBtn.style.display = 'none';
 
             if (data.status === 'PLAYING') {
                 const drawerName = Object.values(data.players || {}).find(p => data.playerOrder?.[data.currentTurn] === Object.keys(data.players).find(k => data.players[k].name === p.name))?.name || 'Someone';
@@ -687,3 +704,15 @@ window.exitRoom = exitRoom;
 window.startGame = startGame;
 window.newGame = newGame;
 window.nextTurn = nextTurn;
+window.skipWord = () => {
+    if (!state.isDrawer) return;
+    if (confirm('Skip this word and move to next turn?')) {
+        database.ref(`rooms/${state.room}/chat`).push({
+            name: '⏭️ GAME',
+            text: `${state.name} skipped the word - too hard!`,
+            type: 'INFO',
+            timestamp: Date.now()
+        });
+        nextTurn();
+    }
+};
