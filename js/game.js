@@ -316,6 +316,10 @@ function listenToRoom() {
                 database.ref(`rooms/${state.room}/action`).set(null);
             }, 100);
         }
+    });
+
+    // 4. Chat - Listen and Auto-Check Answers (Host only)
+    roomRef.child('chat').on('child_added', snap => {
         const msg = snap.val();
 
         // Always show message in chat
@@ -324,10 +328,10 @@ function listenToRoom() {
         // Host automatically checks all guesses
         if (state.isHost && msg.type === 'GUESS') {
             // Check if message is from before we joined (avoid processing old messages)
-            const messageTime = msg.timestamp || 0;
+            const messageTime = msg.timestamp || Date.now(); // Default to now if no timestamp
             const listenerStart = state.listenerStartTime || 0;
 
-            if (messageTime < listenerStart - 1000) { // 1s grace period
+            if (messageTime < listenerStart - 2000) { // 2s grace period for clock differences
                 console.log('⚠️ [HOST] Skipping old message from before rejoin');
                 return;
             }
