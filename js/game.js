@@ -327,36 +327,57 @@ function listenToRoom() {
 
         // Host automatically checks all guesses
         if (state.isHost && msg.type === 'GUESS') {
-            // Check if message is from before we joined (avoid processing old messages)
-            const messageTime = msg.timestamp || Date.now(); // Default to now if no timestamp
-            const listenerStart = state.listenerStartTime || 0;
+            console.log('🎯 [HOST] Received guess:', msg.text, 'from', msg.name);
+            console.log('🎯 [HOST] Message timestamp:', msg.timestamp, 'Listener start:', state.listenerStartTime);
 
-            if (messageTime < listenerStart - 2000) { // 2s grace period for clock differences
-                console.log('⚠️ [HOST] Skipping old message from before rejoin');
+            // Only skip messages that are CLEARLY old (more than 10s before listener started)
+            // This prevents false positives from clock drift
+            const messageTime = msg.timestamp || Date.now();
+            const listenerStart = state.listenerStartTime || 0;
+            const timeDiff = messageTime - listenerStart;
+
+            console.log('🎯 [HOST] Time difference:', timeDiff, 'ms');
+
+            if (messageTime > 0 && listenerStart > 0 && timeDiff < -10000) {
+                console.log('⚠️ [HOST] Skipping very old message (>10s before rejoin)');
                 return;
             }
 
-            console.log('🎯 [HOST] Checking guess:', msg.text, 'from', msg.name);
+            console.log('🎯 [HOST] Proceeding with validation...');
 
             // Don't check if the guesser is the current drawer (prevent self-guessing)
             database.ref(`rooms/${state.room}`).once('value', roomSnap => {
                 const roomData = roomSnap.val();
+
+                if (!roomData) {
+                    console.error('❌ [HOST] Room data not found!');
+                    return;
+                }
+
+                console.log('🎯 [HOST] Current turn:', roomData.currentTurn, 'Round:', roomData.currentRound);
+
                 const currentDrawerId = roomData?.playerOrder?.[roomData?.currentTurn];
                 const players = roomData?.players || {};
                 const guesserName = msg.name;
 
+                console.log('🎯 [HOST] Current drawer ID:', currentDrawerId);
+                console.log('🎯 [HOST] Guesser name:', guesserName);
+
                 // Find if this guesser is the drawer
                 const guesserId = Object.keys(players).find(id => players[id].name === guesserName);
+                console.log('🎯 [HOST] Guesser ID:', guesserId);
 
                 if (guesserId === currentDrawerId) {
                     console.log('⚠️ [HOST] Drawer tried to guess - ignoring');
                     return;
                 }
 
+                console.log('✅ [HOST] Guesser is valid, checking answer...');
                 checkWinCondition(msg.text, msg.name);
             }).catch(err => {
-                console.error('❌ [HOST] Error checking drawer status:', err);
+                console.error('❌ [HOST] Error in drawer validation:', err);
                 // Still check the guess even if we can't verify drawer status
+                console.log('⚠️ [HOST] Proceeding with guess check despite error');
                 checkWinCondition(msg.text, msg.name);
             });
         }
