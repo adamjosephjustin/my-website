@@ -107,29 +107,52 @@ function createGame() {
         return;
     }
 
-    const roomRef = database.ref('rooms/' + state.room);
-    console.log('🎮 [CREATE] Writing to Firebase...');
+    // async handle creation to support custom word fetching
+    const finalizeCreation = (customWords = null) => {
+        const roomRef = database.ref('rooms/' + state.room);
+        console.log('🎮 [CREATE] Writing to Firebase...');
 
-    roomRef.set({
-        status: "LOBBY",
-        settings: state.settings,
-        players: {
-            [state.id]: { name: state.name, score: 0, isHost: true }
-        },
-        currentWord: "WAITING",
-        drawer: "",
-        currentRound: 0,
-        totalRounds: parseInt(state.settings.rounds) || 5,
-        currentTurn: 0,
-        playerOrder: [state.id],
-        usedWords: [] // Track used words to prevent repetition
-    }).then(() => {
-        console.log('✅ [CREATE] Room created successfully!');
-        enterGameRoom();
-    }).catch(err => {
-        console.error('❌ [CREATE] Firebase write FAILED:', err);
-        alert('Failed to create room: ' + err.message);
-    });
+        roomRef.set({
+            status: "LOBBY",
+            settings: state.settings,
+            players: {
+                [state.id]: { name: state.name, score: 0, isHost: true }
+            },
+            currentWord: "WAITING",
+            drawer: "",
+            currentRound: 0,
+            totalRounds: parseInt(state.settings.rounds) || 5,
+            currentTurn: 0,
+            playerOrder: [state.id],
+            usedWords: [], // Track used words to prevent repetition
+            customWordList: customWords // Save custom list if exists
+        }).then(() => {
+            console.log('✅ [CREATE] Room created successfully!');
+            enterGameRoom();
+        }).catch(err => {
+            console.error('❌ [CREATE] Firebase write FAILED:', err);
+            alert('Failed to create room: ' + err.message);
+        });
+    };
+
+    if (state.settings.lang === 'CUSTOM') {
+        console.log('🦄 [CREATE] Fetching custom words...');
+        database.ref('custom_words').once('value').then(snapshot => {
+            const wordsObj = snapshot.val();
+            if (!wordsObj) {
+                alert("No custom words found! Please add some in the Admin Dashboard.");
+                return;
+            }
+            const wordsList = Object.values(wordsObj); // Convert {id: word} to [word, word]
+            console.log('🦄 [CREATE] Loaded', wordsList.length, 'custom words.');
+            finalizeCreation(wordsList);
+        }).catch(err => {
+            console.error('❌ [CREATE] Failed to fetch custom words:', err);
+            alert('Could not load custom words.');
+        });
+    } else {
+        finalizeCreation(null);
+    }
 }
 
 function joinGame() {
@@ -437,7 +460,16 @@ function nextTurn() {
         }
 
         // Pick word (avoid repetition)
-        const list = WORD_LIST[data.settings.lang][data.settings.diff];
+        let list;
+        if (data.settings.lang === 'CUSTOM' && data.customWordList) {
+            console.log('🦄 [NEXT] Using custom word list (' + data.customWordList.length + ' words)');
+            list = data.customWordList;
+        } else {
+            // Fallback to standard list handling
+            const lang = WORD_LIST[data.settings.lang] ? data.settings.lang : 'EN';
+            const diff = data.settings.diff || 'EASY';
+            list = WORD_LIST[lang][diff];
+        }
         const usedWords = data.usedWords || [];
 
         // Filter out used words

@@ -24,6 +24,9 @@
             <input type="text" id="input-name" class="neat-input" placeholder="Adam..." maxlength="12">
             <div class="btn-group">
                 <button class="btn-big btn-primary" onclick="submitName()">LET'S GO! 🚀</button>
+                <br>
+                <button class="btn-big btn-secondary" onclick="location.href='admin.html'"
+                    style="margin-top:10px; font-size:0.9rem; padding: 10px 20px;">🔑 Admin</button>
             </div>
         </div>
 
@@ -48,6 +51,8 @@
                 <div class="toggle-option selected" data-value="EN" onclick="selectSetting('lang','EN')">🇬🇧 English
                 </div>
                 <div class="toggle-option" data-value="NL" onclick="selectSetting('lang','NL')">🇳🇱 Dutch</div>
+                <div class="toggle-option" data-value="CUSTOM" onclick="selectSetting('lang','CUSTOM')">🦄 Own Database
+                </div>
             </div>
 
             <p>Difficulty</p>
