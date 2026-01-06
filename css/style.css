@@ -252,11 +252,22 @@ p {
     background: rgba(255, 255, 255, 0.9);
     border-radius: 15px;
     height: 150px;
+    max-height: 150px;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 10px;
     margin-top: 10px;
     text-align: left;
     border: 2px solid #eee;
+    scroll-behavior: smooth;
+}
+
+.guess-input-container {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 10px 0;
+    margin-top: 10px;
 }
 
 .msg-guess {
@@ -275,6 +286,37 @@ p {
     text-align: center;
 }
 
+.msg-chat {
+    background: #e3f2fd;
+    padding: 5px 10px;
+    border-radius: 10px;
+    margin: 5px 0;
+    display: block;
+    border-left: 3px solid #2196f3;
+}
+
+.emoji-picker {
+    display: flex;
+    gap: 5px;
+    margin: 5px 0;
+    flex-wrap: wrap;
+}
+
+.emoji-btn {
+    background: transparent;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+}
+
+.emoji-btn:hover {
+    background: #f0f0f0;
+    transform: scale(1.1);
+}
+
 /* UTILS */
 .hidden {
     display: none !important;
@@ -283,72 +325,212 @@ p {
 .fade-in {
     animation: fadeIn 0.5s;
 }
+
+/* WINNER OVERLAY */
+.winner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    animation: fadeIn 0.5s;
+}
+
+#confetti-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.winner-card {
+    background: white;
+    border-radius: 30px;
+    padding: 50px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    position: relative;
+    z-index: 2;
+    animation: scaleUp 0.6s ease-out;
+}
+
+.winner-card h1 {
+    font-size: 4rem;
+    margin: 0 0 20px 0;
+    animation: bounce 1s infinite;
+}
+
+.winner-name {
+    font-family: 'Bangers', cursive;
+    font-size: 3rem;
+    color: var(--primary);
+    margin: 20px 0;
+    text-shadow: 2px 2px 0 var(--dark);
+}
+
+.final-scores {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.score-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 1.2rem;
+}
+
+.score-item:last-child {
+    border-bottom: none;
+}
+
+.score-item.winner-highlight {
+    background: linear-gradient(90deg, #FFE66D, #FF6B6B);
+    border-radius: 10px;
+    font-weight: bold;
+    color: var(--dark);
+}
+
+@keyframes scaleUp {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
 /* ==========================================
    MOBILE RESPONSIVE DESIGN
    ========================================== */
 @media (max-width: 768px) {
+
     /* Wizard Screens */
     .view-card {
         padding: 20px;
     }
-    
-    h1 { font-size: 2.5rem; }
-    h2 { font-size: 1.8rem; }
-    
+
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    h2 {
+        font-size: 1.8rem;
+    }
+
     .btn-big {
         min-width: 200px;
         font-size: 1.5rem;
     }
-    
+
     /* GAME SCREEN - Stack Vertically */
-    #view-game > div {
+    #view-game>div {
         flex-direction: column !important;
     }
-    
+
     /* Hide players list on mobile (save space) */
-    #view-game > div > .view-card:first-child {
+    #view-game>div>.view-card:first-child {
         display: none;
     }
-    
+
     /* Canvas Container - Full Width */
-    #view-game > div > div:nth-child(2) {
+    #view-game>div>div:nth-child(2) {
         width: 100% !important;
     }
-    
+
     .canvas-container {
         width: 100%;
     }
-    
+
     #main-canvas {
         width: 100% !important;
         height: auto;
         max-height: 300px;
     }
-    
+
     /* Toolbar - Wrap colors */
     .canvas-toolbar {
         flex-wrap: wrap;
         gap: 8px;
     }
-    
+
     /* Chat - Show below canvas */
-    #view-game > div > .view-card:last-child {
+    #view-game>div>.view-card:last-child {
         width: 100% !important;
         margin-top: 10px;
         padding: 15px;
     }
-    
+
     .chat-box {
         height: 120px;
+        max-height: 120px;
     }
-    
+
+    .guess-input-container {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        z-index: 10;
+    }
+
+    .winner-card {
+        padding: 30px 20px;
+        max-width: 90%;
+    }
+
+    .winner-card h1 {
+        font-size: 2.5rem;
+    }
+
+    .winner-name {
+        font-size: 2rem;
+    }
+
     /* Game Header - Stack */
     .game-header {
         flex-direction: column;
         gap: 10px;
         padding: 10px;
     }
-    
+
     #word-display {
         font-size: 1.5rem !important;
     }
@@ -356,13 +538,15 @@ p {
 
 /* Small phones */
 @media (max-width: 480px) {
-    h1 { font-size: 2rem; }
-    
+    h1 {
+        font-size: 2rem;
+    }
+
     .btn-big {
         font-size: 1.3rem;
         padding: 12px 30px;
     }
-    
+
     .neat-input {
         font-size: 1.5rem;
         width: 90%;
@@ -380,6 +564,7 @@ p {
     cursor: pointer;
     font-size: 1.2rem;
 }
+
 .btn-exit:hover {
     background: #c0392b;
     transform: scale(1.05);
@@ -401,15 +586,15 @@ p {
     #main-canvas {
         height: 350px !important;
     }
-    
+
     /* Stack sidebar below canvas */
-    #view-game > div > div:last-child {
+    #view-game>div>div:last-child {
         width: 100% !important;
         flex-direction: row;
         gap: 10px;
     }
-    
-    #view-game > div > div:last-child > .view-card {
+
+    #view-game>div>div:last-child>.view-card {
         flex: 1;
     }
 }

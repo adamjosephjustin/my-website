@@ -162,11 +162,26 @@ function joinGame() {
     const roomRef = database.ref('rooms/' + state.room);
     roomRef.once('value', (snapshot) => {
         if (snapshot.exists()) {
-            database.ref(`rooms/${state.room}/players/${state.id}`).set({
-                name: state.name, score: 0, isHost: false
-            });
+            const roomData = snapshot.val();
+            const existingPlayer = roomData.players?.[state.id];
 
-            // Add to player order
+            // If player already exists, preserve their score
+            if (existingPlayer) {
+                console.log('👋 [REJOIN] Player rejoining - preserving score:', existingPlayer.score);
+                database.ref(`rooms/${state.room}/players/${state.id}`).update({
+                    name: state.name,
+                    isHost: existingPlayer.isHost || false
+                    // DON'T update score - preserve existing
+                });
+            } else {
+                // New player joining
+                console.log('🆕 [JOIN] New player joining');
+                database.ref(`rooms/${state.room}/players/${state.id}`).set({
+                    name: state.name, score: 0, isHost: false
+                });
+            }
+
+            // Add to player order if not already there
             database.ref(`rooms/${state.room}/playerOrder`).once('value', orderSnap => {
                 const order = orderSnap.val() || [];
                 if (!order.includes(state.id)) {
@@ -195,18 +210,21 @@ function enterGameRoom() {
 }
 
 function exitRoom() {
-    if (!confirm('Leave this room?')) return;
+    if (!confirm('⚠️ Are you sure you want to leave? Your score will be saved if you rejoin!')) return;
 
-    // Remove from Firebase
-    if (state.room && state.id) {
-        database.ref(`rooms/${state.room}/players/${state.id}`).remove();
-    }
+    // DON'T remove player from Firebase - keep them for rejoin
+    // Just mark them as inactive or let them stay
+    // We only clear local state
 
     // Clear local state
     localStorage.removeItem('pictionary_last_room');
     state.room = '';
     state.isHost = false;
     state.isDrawer = false;
+
+    // Hide winner overlay if shown
+    const winnerOverlay = document.getElementById('winner-overlay');
+    if (winnerOverlay) winnerOverlay.classList.add('hidden');
 
     // Return to mode select
     switchView('mode');
@@ -320,9 +338,20 @@ function listenToRoom() {
         if (newGameBtn) {
             newGameBtn.style.display = (state.isHost && data.status === 'FINISHED') ? 'block' : 'none';
         }
+
+        // Show winner screen when game finishes
+        if (data.status === 'FINISHED') {
+            showWinnerScreen(data.players || {});
+        }
     });
 
-    // 3. Drawing
+    // 3. General Chat
+    roomRef.child('generalChat').on('child_added', snap => {
+        const msg = snap.val();
+        addGeneralChatMessage(msg.name, msg.text);
+    });
+
+    // 4. Drawing
     roomRef.child('drawing').on('child_added', data => drawFromRemote(data.val()));
 
     // Canvas Clear Listener
@@ -341,7 +370,7 @@ function listenToRoom() {
         }
     });
 
-    // 4. Chat - Listen and Auto-Check Answers (Host only)
+    // 5. Chat - Listen and Auto-Check Answers (Host only)
     roomRef.child('chat').on('child_added', snap => {
         const msg = snap.val();
 
@@ -528,6 +557,10 @@ function nextTurn() {
 }
 
 function newGame() {
+    // Hide winner overlay
+    const winnerOverlay = document.getElementById('winner-overlay');
+    if (winnerOverlay) winnerOverlay.classList.add('hidden');
+
     database.ref(`rooms/${state.room}`).update({
         status: 'LOBBY',
         currentRound: 0,
@@ -779,3 +812,131 @@ window.skipWord = () => {
         nextTurn();
     }
 };
+
+// ==========================================
+// GENERAL CHAT (Non-game messages)
+// ==========================================
+function sendChatMessage() {
+    const input = document.getElementById('input-chat');
+    const txt = input.value.trim();
+    if (!txt) return;
+    input.value = "";
+
+    console.log('💬 [CHAT] Sending message:', txt);
+
+    database.ref(`rooms/${state.room}/generalChat`).push({
+        name: state.name,
+        text: txt,
+        timestamp: Date.now()
+    });
+}
+
+function addGeneralChatMessage(name, text) {
+    const box = document.getElementById('general-chat-box');
+    const el = document.createElement('div');
+    el.className = 'msg-chat';
+    el.innerHTML = `<strong>${name}:</strong> ${text}`;
+    box.appendChild(el);
+    box.scrollTop = box.scrollHeight;
+}
+
+function insertEmoji(emoji) {
+    const input = document.getElementById('input-chat');
+    input.value += emoji;
+    input.focus();
+}
+
+// ==========================================
+// WINNER CELEBRATION
+// ==========================================
+function showWinnerScreen(players) {
+    console.log('🏆 [WINNER] Showing winner screen');
+
+    // Calculate winner
+    const playerArray = Object.entries(players).map(([id, data]) => ({
+        id,
+        name: data.name,
+        score: data.score || 0
+    }));
+
+    playerArray.sort((a, b) => b.score - a.score);
+
+    const winner = playerArray[0];
+
+    // Update winner display
+    document.getElementById('winner-name').innerText = winner.name;
+
+    // Show scores
+    const scoresDiv = document.getElementById('final-scores');
+    scoresDiv.innerHTML = playerArray.map((p, index) => `
+        <div class="score-item ${index === 0 ? 'winner-highlight' : ''}">
+            <span>${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '👤'} ${p.name}</span>
+            <span>${p.score} pts</span>
+        </div>
+    `).join('');
+
+    // Show overlay
+    const overlay = document.getElementById('winner-overlay');
+    overlay.classList.remove('hidden');
+
+    // Start confetti
+    startConfetti();
+}
+
+function startConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    if (!canvas) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const ctx = canvas.getContext('2d');
+    const confetti = [];
+    const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#2ECC71', '#3498db', '#9b59b6'];
+
+    // Create confetti pieces
+    for (let i = 0; i < 150; i++) {
+        confetti.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            size: Math.random() * 8 + 5,
+            speedY: Math.random() * 3 + 2,
+            speedX: Math.random() * 2 - 1,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * 360,
+            rotationSpeed: Math.random() * 10 - 5
+        });
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        confetti.forEach((piece, index) => {
+            piece.y += piece.speedY;
+            piece.x += piece.speedX;
+            piece.rotation += piece.rotationSpeed;
+
+            // Reset if falls off screen
+            if (piece.y > canvas.height) {
+                piece.y = -10;
+                piece.x = Math.random() * canvas.width;
+            }
+
+            // Draw confetti piece
+            ctx.save();
+            ctx.translate(piece.x, piece.y);
+            ctx.rotate(piece.rotation * Math.PI / 180);
+            ctx.fillStyle = piece.color;
+            ctx.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size);
+            ctx.restore();
+        });
+
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+}
+
+// Expose new functions to window
+window.sendChatMessage = sendChatMessage;
+window.insertEmoji = insertEmoji;

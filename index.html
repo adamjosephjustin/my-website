@@ -147,18 +147,59 @@
                         <div id="players-list" style="font-size:0.9rem;">Loading...</div>
                     </div>
 
-                    <!-- Chat -->
+                    <!-- Guesses -->
                     <div class="view-card" style="padding:15px; flex:1; display:flex; flex-direction:column;">
                         <h3 style="margin:0 0 10px 0;">Guesses</h3>
-                        <div id="chat-box" class="chat-box" style="flex:1;"></div>
-                        <div style="display:flex; gap:5px; margin-top:10px;">
-                            <input id="input-guess" type="text"
-                                style="flex:1; padding:8px; border-radius:10px; border:2px solid #ddd; font-size:1rem;"
-                                placeholder="Type guess..." onkeydown="if(event.key==='Enter') submitGuess()">
-                            <button id="send-guess-btn" onclick="submitGuess()"
-                                style="padding:8px 15px; background:var(--success); color:white; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">SEND</button>
+                        <div id="chat-box" class="chat-box"></div>
+                        <div class="guess-input-container">
+                            <div style="display:flex; gap:5px;">
+                                <input id="input-guess" type="text"
+                                    style="flex:1; padding:8px; border-radius:10px; border:2px solid #ddd; font-size:1rem;"
+                                    placeholder="Type guess..." onkeydown="if(event.key==='Enter') submitGuess()">
+                                <button id="send-guess-btn" onclick="submitGuess()"
+                                    style="padding:8px 15px; background:var(--success); color:white; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">SEND</button>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Chat -->
+                    <div class="view-card" style="padding:15px; flex:1; display:flex; flex-direction:column;">
+                        <h3 style="margin:0 0 10px 0;">💬 Chat</h3>
+                        <div id="general-chat-box" class="chat-box"></div>
+                        <div class="guess-input-container">
+                            <div class="emoji-picker">
+                                <button class="emoji-btn" onclick="insertEmoji('😀')">😀</button>
+                                <button class="emoji-btn" onclick="insertEmoji('😂')">😂</button>
+                                <button class="emoji-btn" onclick="insertEmoji('🎉')">🎉</button>
+                                <button class="emoji-btn" onclick="insertEmoji('👍')">👍</button>
+                                <button class="emoji-btn" onclick="insertEmoji('❤️')">❤️</button>
+                                <button class="emoji-btn" onclick="insertEmoji('🎨')">🎨</button>
+                                <button class="emoji-btn" onclick="insertEmoji('🔥')">🔥</button>
+                                <button class="emoji-btn" onclick="insertEmoji('⭐')">⭐</button>
+                            </div>
+                            <div style="display:flex; gap:5px;">
+                                <input id="input-chat" type="text"
+                                    style="flex:1; padding:8px; border-radius:10px; border:2px solid #ddd; font-size:1rem;"
+                                    placeholder="Type message..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+                                <button onclick="sendChatMessage()"
+                                    style="padding:8px 15px; background:#2196f3; color:white; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">SEND</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WINNER OVERLAY -->
+        <div id="winner-overlay" class="winner-overlay hidden">
+            <canvas id="confetti-canvas"></canvas>
+            <div class="winner-card">
+                <h1>🎉 WINNER 🎉</h1>
+                <div id="winner-name" class="winner-name"></div>
+                <div id="final-scores" class="final-scores"></div>
+                <div class="btn-group">
+                    <button class="btn-big btn-primary" onclick="newGame()">🔄 PLAY AGAIN</button>
+                    <button class="btn-big btn-secondary" onclick="exitRoom()">🚪 EXIT</button>
                 </div>
             </div>
         </div>
