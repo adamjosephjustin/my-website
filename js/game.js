@@ -412,7 +412,7 @@ function startGame() {
     database.ref(`rooms/${state.room}`).update({
         status: "PLAYING",
         currentRound: 1,
-        currentTurn: 0
+        currentTurn: -1 // Start at -1 so first increment goes to 0 (first player)
     });
     nextTurn();
 }
@@ -462,8 +462,10 @@ function nextTurn() {
         // Pick word (avoid repetition)
         let list;
         if (data.settings.lang === 'CUSTOM' && data.customWordList) {
-            console.log('🦄 [NEXT] Using custom word list (' + data.customWordList.length + ' words)');
-            list = data.customWordList;
+            // Robustly handle custom words (could be Array or Object from Firebase)
+            const rawList = data.customWordList;
+            list = Array.isArray(rawList) ? rawList : Object.values(rawList);
+            console.log('🦄 [NEXT] Using custom word list (' + list.length + ' words)');
         } else {
             // Fallback to standard list handling
             const lang = WORD_LIST[data.settings.lang] ? data.settings.lang : 'EN';
