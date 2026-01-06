@@ -533,7 +533,8 @@ function nextTurn() {
             currentTurn: currentTurn,
             currentRound: currentRound,
             action: 'CLEAR',
-            usedWords: usedWords
+            usedWords: usedWords,
+            roundWinner: null // Clear winner flag for new turn
         };
 
         console.log('⏭️ [NEXT] Updating Firebase with:', updates);
@@ -725,30 +726,52 @@ function checkWinCondition(guess, guesserName) {
         console.log('🎯 [CHECK] Correct word is:', correctWord);
 
         if (guess.toLowerCase() === correctWord.toLowerCase()) {
-            console.log('✅ [WIN] Correct guess! Advancing turn...');
+            console.log('✅ [WIN] Correct guess detected!');
 
-            database.ref(`rooms/${state.room}/chat`).push({
-                name: "🎉 GAME",
-                text: `${guesserName} guessed it! Next turn...`,
-                type: 'WIN'
-            });
-
-            // Give points
-            database.ref(`rooms/${state.room}/players`).once('value', playersSnap => {
-                const players = playersSnap.val() || {};
-                const winnerId = Object.keys(players).find(id => players[id].name === guesserName);
-                if (winnerId) {
-                    database.ref(`rooms/${state.room}/players/${winnerId}/score`).transaction(score => (score || 0) + 10);
+            // Use transaction to claim the win (prevents race condition)
+            database.ref(`rooms/${state.room}/roundWinner`).transaction(currentWinner => {
+                // If someone already won this round, don't override
+                if (currentWinner !== null && currentWinner !== undefined) {
+                    console.log('⚠️ [WIN] Someone already won this round:', currentWinner);
+                    return; // Abort transaction
                 }
-            });
+                // Otherwise, this player is the winner
+                return guesserName;
+            }).then(result => {
+                if (!result.committed) {
+                    console.log('❌ [WIN] Lost race - someone else won first');
+                    return;
+                }
 
-            // Next turn after 3s
-            setTimeout(nextTurn, 3000);
+                console.log('🎉 [WIN] This player won! Awarding points and advancing turn...');
+
+                // Announce winner
+                database.ref(`rooms/${state.room}/chat`).push({
+                    name: "🎉 GAME",
+                    text: `${guesserName} guessed it! Next turn...`,
+                    type: 'WIN'
+                });
+
+                // Give points
+                database.ref(`rooms/${state.room}/players`).once('value', playersSnap => {
+                    const players = playersSnap.val() || {};
+                    const winnerId = Object.keys(players).find(id => players[id].name === guesserName);
+                    if (winnerId) {
+                        database.ref(`rooms/${state.room}/players/${winnerId}/score`).transaction(score => (score || 0) + 10);
+                    }
+                });
+
+                // Next turn after 3s
+                setTimeout(nextTurn, 3000);
+            }).catch(err => {
+                console.error('❌ [WIN] Transaction error:', err);
+            });
         } else {
             console.log('❌ [CHECK] Wrong guess');
         }
     });
 }
+
 
 function addChatBubble(name, text, type) {
     const box = document.getElementById('chat-box');
