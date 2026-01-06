@@ -143,7 +143,7 @@ function createGame() {
                 alert("No custom words found! Please add some in the Admin Dashboard.");
                 return;
             }
-            const wordsList = Object.values(wordsObj); // Convert {id: word} to [word, word]
+            const wordsList = Object.values(wordsObj || {}).map(w => String(w)); // Convert {id: word} to ["word", "word"]
             console.log('🦄 [CREATE] Loaded', wordsList.length, 'custom words.');
             finalizeCreation(wordsList);
         }).catch(err => {
@@ -461,10 +461,11 @@ function nextTurn() {
 
         // Pick word (avoid repetition)
         let list;
-        if (data.settings.lang === 'CUSTOM' && data.customWordList) {
+        if (data.settings.lang === 'CUSTOM') {
             // Robustly handle custom words (could be Array or Object from Firebase)
-            const rawList = data.customWordList;
-            list = Array.isArray(rawList) ? rawList : Object.values(rawList);
+            const rawList = data.customWordList || [];
+            // Parse to array of strings
+            list = (Array.isArray(rawList) ? rawList : Object.values(rawList)).map(w => String(w));
             console.log('🦄 [NEXT] Using custom word list (' + list.length + ' words)');
         } else {
             // Fallback to standard list handling
@@ -472,7 +473,10 @@ function nextTurn() {
             const diff = data.settings.diff || 'EASY';
             list = WORD_LIST[lang][diff];
         }
-        const usedWords = data.usedWords || [];
+
+        // Robustly handle usedWords (Firebase may return object for sparse arrays)
+        const rawUsed = data.usedWords || [];
+        const usedWords = Array.isArray(rawUsed) ? rawUsed : Object.values(rawUsed);
 
         // Filter out used words
         let availableWords = list.filter(w => !usedWords.includes(w));
