@@ -818,9 +818,26 @@ window.skipWord = () => {
 // ==========================================
 function sendChatMessage() {
     const input = document.getElementById('input-chat');
+    if (!input) {
+        console.error('❌ [CHAT] Input element not found');
+        return;
+    }
+
     const txt = input.value.trim();
     if (!txt) return;
-    input.value = "";
+
+    // Check if database and room are available
+    if (!database) {
+        console.error('❌ [CHAT] Database not initialized');
+        alert('Not connected to game server. Please refresh the page.');
+        return;
+    }
+
+    if (!state.room) {
+        console.error('❌ [CHAT] Not in a room');
+        alert('Please join or create a room first!');
+        return;
+    }
 
     console.log('💬 [CHAT] Sending message:', txt);
 
@@ -828,6 +845,12 @@ function sendChatMessage() {
         name: state.name,
         text: txt,
         timestamp: Date.now()
+    }).then(() => {
+        console.log('✅ [CHAT] Message sent successfully');
+        input.value = "";
+    }).catch(err => {
+        console.error('❌ [CHAT] Failed to send message:', err);
+        alert('Failed to send message: ' + err.message);
     });
 }
 
