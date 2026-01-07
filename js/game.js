@@ -201,6 +201,15 @@ function enterGameRoom() {
     document.getElementById('room-badge').innerText = `Room: ${state.room}`;
     localStorage.setItem('pictionary_last_room', state.room); // Save for rejoin
 
+    // CLEAR OLD GAME DATA (fixes bug where old drawings/chat persist in new rooms)
+    clearCanvasUI(); // Clear the drawing canvas
+
+    // Clear chat boxes
+    document.getElementById('chat-box').innerHTML = '';
+    document.getElementById('general-chat-box').innerHTML = '';
+
+    console.log('🧹 [ENTER] Cleared canvas and chat boxes for fresh start');
+
     // Store listener start time to avoid processing old messages
     state.listenerStartTime = Date.now();
     console.log('👂 [LISTENER] Start time:', state.listenerStartTime);
@@ -542,6 +551,9 @@ function nextTurn() {
         database.ref(`rooms/${state.room}`).update(updates).then(() => {
             console.log('✅ [NEXT] Turn advanced successfully!');
 
+            // DEFENSIVE: Force clear roundWinner flag (backup to ensure it's always cleared)
+            database.ref(`rooms/${state.room}/roundWinner`).remove();
+
             // Hide NEXT button when turn advances
             const nextBtn = document.getElementById('next-turn-btn');
             if (nextBtn) {
@@ -721,8 +733,23 @@ function submitGuess() {
 function checkWinCondition(guess, guesserName) {
     console.log('🎯 [CHECK] Validating guess:', guess, 'against word');
 
-    database.ref(`rooms/${state.room}/currentWord`).once('value', snap => {
-        const correctWord = snap.val() || "";
+    // DEFENSIVE CHECK: Get full room data to check if someone already won
+    database.ref(`rooms/${state.room}`).once('value', snap => {
+        const data = snap.val();
+        if (!data) {
+            console.error('❌ [CHECK] Room data not found');
+            return;
+        }
+
+        const correctWord = data.currentWord || "";
+        const existingWinner = data.roundWinner;
+
+        // If someone already won this round, don't process this guess
+        if (existingWinner !== null && existingWinner !== undefined) {
+            console.log('⚠️ [CHECK] Round already won by', existingWinner, '- ignoring guess');
+            return;
+        }
+
         console.log('🎯 [CHECK] Correct word is:', correctWord);
 
         if (guess.toLowerCase() === correctWord.toLowerCase()) {
