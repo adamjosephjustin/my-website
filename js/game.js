@@ -296,6 +296,10 @@ function listenToRoom() {
             state.isDrawer = true;
             document.getElementById('word-display').innerText = "YOUR WORD: " + data.currentWord;
 
+            // Show canvas toolbar for drawer (colors + clear button)
+            const canvasToolbar = document.getElementById('canvas-toolbar');
+            if (canvasToolbar) canvasToolbar.style.display = 'flex';
+
             // Disable guess input for drawer
             const guessInput = document.getElementById('input-guess');
             const sendBtn = document.getElementById('send-guess-btn');
@@ -311,6 +315,10 @@ function listenToRoom() {
             if (skipWordBtn) skipWordBtn.style.display = 'inline-block';
         } else {
             state.isDrawer = false;
+
+            // Hide canvas toolbar for non-drawers (prevents clearing)
+            const canvasToolbar = document.getElementById('canvas-toolbar');
+            if (canvasToolbar) canvasToolbar.style.display = 'none';
 
             // Enable guess input for guessers
             const guessInput = document.getElementById('input-guess');

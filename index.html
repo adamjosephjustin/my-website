@@ -115,8 +115,9 @@
                         <canvas id="main-canvas" width="800" height="500" style="width:100%; display:block;"></canvas>
                     </div>
 
-                    <!-- COLOR TOOLBAR - Always visible -->
-                    <div class="canvas-toolbar" style="margin-top:15px; display:flex; justify-content:center;">
+                    <!-- COLOR TOOLBAR - Only visible for drawer -->
+                    <div id="canvas-toolbar" class="canvas-toolbar"
+                        style="margin-top:15px; display:flex; justify-content:center;">
                         <div class="color-dot active" style="background:black" onclick="setColor('#000', this)"></div>
                         <div class="color-dot" style="background:#ff4757" onclick="setColor('#ff4757', this)"></div>
                         <div class="color-dot" style="background:#2ed573" onclick="setColor('#2ed573', this)"></div>
