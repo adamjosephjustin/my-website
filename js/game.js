@@ -830,6 +830,14 @@ function setColor(c, element) {
 
 window.clearBoard = () => {
     console.log('🗑️ [CLEAR] Clearing canvas...');
+
+    // Only drawer can clear the canvas
+    if (!state.isDrawer) {
+        console.warn('⚠️ [CLEAR] Only the drawer can clear the canvas!');
+        alert('Only the drawer can clear the canvas! 🎨');
+        return;
+    }
+
     if (!database || !state.room) {
         console.error('❌ [CLEAR] No database or room');
         return;
